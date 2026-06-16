@@ -25,6 +25,8 @@ const backgroundColorInput = document.getElementById("backgroundColorInput");
 const loadImageBtn = document.getElementById("loadImageBtn");
 const imageInput = document.getElementById("imageInput");
 const imageImportMode = document.getElementById("imageImportMode");
+const confirmImageBtn = document.getElementById("confirmImageBtn");
+const cancelImageBtn = document.getElementById("cancelImageBtn");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
@@ -62,6 +64,7 @@ let shapeStartPoint = null;
 let canvasWidth = 0;
 let canvasHeight = 0;
 let history = [];
+let pendingImage = null;
 
 let layers = [];
 let activeLayerId = null;
@@ -80,6 +83,14 @@ function getPointerPoint(event) {
   return {
     x: event.clientX - rect.left,
     y: event.clientY - rect.top
+  };
+}
+
+function getPointerCanvasPoint(event) {
+  const point = getPointerPoint(event);
+  return {
+    x: point.x * renderScale,
+    y: point.y * renderScale
   };
 }
 
@@ -104,6 +115,8 @@ function getToolHintText(tool = currentTool) {
 }
 
 function shouldShowInitialHint() {
+  if (pendingImage) return true;
+
   const activeLayer = getActiveLayer();
 
   if (!activeLayer) return true;
@@ -114,6 +127,11 @@ function shouldShowInitialHint() {
 }
 
 function updateHintText() {
+  if (pendingImage) {
+    hint.textContent = "画像をドラッグで移動し、確定または取消してください";
+    return;
+  }
+
   const activeLayer = getActiveLayer();
 
   if (activeLayer && !activeLayer.visible) {
@@ -248,6 +266,31 @@ function renderAllLayers() {
 
   ctx.restore();
   resetDisplaySettings();
+  renderPendingImagePreview();
+}
+
+function renderPendingImagePreview() {
+  if (!pendingImage) return;
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.setLineDash([]);
+  ctx.drawImage(
+    pendingImage.image,
+    pendingImage.x,
+    pendingImage.y,
+    pendingImage.width,
+    pendingImage.height
+  );
+
+  ctx.strokeStyle = "#2563eb";
+  ctx.lineWidth = 2 * renderScale;
+  ctx.setLineDash([6 * renderScale, 4 * renderScale]);
+  ctx.strokeRect(pendingImage.x, pendingImage.y, pendingImage.width, pendingImage.height);
+  ctx.restore();
+  resetDisplaySettings();
 }
 
 function resizeLayerCanvases() {
@@ -376,6 +419,11 @@ function getToolLabel() {
 }
 
 function updateStatus() {
+  if (pendingImage) {
+    status.textContent = "画像配置中：ドラッグで移動 / 確定または取消してください";
+    return;
+  }
+
   const sizeLabel = sizeSelect.options[sizeSelect.selectedIndex].text;
   const activeLayer = getActiveLayer();
 
@@ -414,16 +462,21 @@ function updateLayerUI() {
   const activeLayer = getActiveLayer();
   const activeIndex = getActiveLayerIndex();
 
-  addLayerBtn.disabled = layers.length >= maxLayers;
-  duplicateLayerBtn.disabled = !activeLayer || !activeLayer.visible || layers.length >= maxLayers;
-  deleteLayerBtn.disabled = layers.length <= 1;
-  renameLayerBtn.disabled = !activeLayer;
-  toggleLayerVisibilityBtn.disabled = !activeLayer;
-  layerOpacityInput.disabled = !activeLayer;
-  moveLayerUpBtn.disabled = !activeLayer || activeIndex === layers.length - 1;
-  moveLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
+  const isPlacingImage = Boolean(pendingImage);
+
+  addLayerBtn.disabled = isPlacingImage || layers.length >= maxLayers;
+  duplicateLayerBtn.disabled = isPlacingImage || !activeLayer || !activeLayer.visible || layers.length >= maxLayers;
+  deleteLayerBtn.disabled = isPlacingImage || layers.length <= 1;
+  renameLayerBtn.disabled = isPlacingImage || !activeLayer;
+  toggleLayerVisibilityBtn.disabled = isPlacingImage || !activeLayer;
+  layerOpacityInput.disabled = isPlacingImage || !activeLayer;
+  moveLayerUpBtn.disabled = isPlacingImage || !activeLayer || activeIndex === layers.length - 1;
+  moveLayerDownBtn.disabled = isPlacingImage || !activeLayer || activeIndex <= 0;
   const lowerLayer = activeIndex > 0 ? layers[activeIndex - 1] : null;
-  mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
+  mergeLayerDownBtn.disabled = isPlacingImage || !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
+  layerSelect.disabled = isPlacingImage;
+  confirmImageBtn.disabled = !isPlacingImage;
+  cancelImageBtn.disabled = !isPlacingImage;
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -665,6 +718,11 @@ function drawTextAt(point) {
 function startDrawing(event) {
   event.preventDefault();
 
+  if (pendingImage) {
+    startPendingImageDrag(event);
+    return;
+  }
+
   if (!canDrawOnActiveLayer({ showAlert: true })) {
     if (currentTool === "text") {
       setTool("pen");
@@ -704,6 +762,11 @@ function startDrawing(event) {
 }
 
 function draw(event) {
+  if (pendingImage) {
+    movePendingImage(event);
+    return;
+  }
+
   if (!isDrawing) return;
   event.preventDefault();
 
@@ -729,6 +792,11 @@ function getPointDistance(startPoint, endPoint) {
 }
 
 function stopDrawing(event) {
+  if (pendingImage) {
+    stopPendingImageDrag(event);
+    return;
+  }
+
   if (!isDrawing) return;
   event.preventDefault();
 
@@ -1011,6 +1079,11 @@ function createExportCanvas() {
 }
 
 function savePng() {
+  if (pendingImage) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
   const exportCanvas = createExportCanvas();
 
   if (!exportCanvas) {
@@ -1051,64 +1124,200 @@ function createImageLayerName() {
   return `画像${number}`;
 }
 
-function drawImportedImage(image, targetLayer, options = {}) {
-  if (!targetLayer || !targetLayer.visible) return;
+function drawImageToLayer(pending, targetLayer, options = {}) {
+  if (!targetLayer || !targetLayer.visible) return false;
 
   if (options.clearBeforeDraw) {
     clearActiveLayerWithoutRender(targetLayer);
   }
 
-  const scale = Math.min(
-    targetLayer.canvas.width / image.naturalWidth,
-    targetLayer.canvas.height / image.naturalHeight,
-    1
-  );
-
-  const drawWidth = image.naturalWidth * scale;
-  const drawHeight = image.naturalHeight * scale;
-  const drawX = (targetLayer.canvas.width - drawWidth) / 2;
-  const drawY = (targetLayer.canvas.height - drawHeight) / 2;
-
   targetLayer.ctx.save();
   targetLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
   targetLayer.ctx.globalCompositeOperation = "source-over";
-  targetLayer.ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+  targetLayer.ctx.globalAlpha = 1;
+  targetLayer.ctx.setLineDash([]);
+  targetLayer.ctx.drawImage(pending.image, pending.x, pending.y, pending.width, pending.height);
   targetLayer.ctx.restore();
 
   resetLayerDrawingSettings(targetLayer.ctx);
-  setHintVisible(false);
-  renderAllLayers();
+  return true;
 }
 
-function importImage(image) {
-  const shouldCreateLayer = imageImportMode.value === "new-layer";
+function updateImagePlacementControls() {
+  const isPlacingImage = Boolean(pendingImage);
+  confirmImageBtn.disabled = !isPlacingImage;
+  cancelImageBtn.disabled = !isPlacingImage;
+  loadImageBtn.disabled = false;
+  imageImportMode.disabled = isPlacingImage;
+  updateLayerUI();
+}
 
-  if (shouldCreateLayer) {
-    if (layers.length >= maxLayers) {
-      alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
-      return;
-    }
+function calculateInitialImagePlacement(image) {
+  const scale = Math.min(
+    canvas.width / image.naturalWidth,
+    canvas.height / image.naturalHeight,
+    1
+  );
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
 
-    const imageLayer = createLayer(createImageLayerName());
-    if (!imageLayer) return;
+  return {
+    x: (canvas.width - width) / 2,
+    y: (canvas.height - height) / 2,
+    width,
+    height
+  };
+}
 
-    layers.push(imageLayer);
-    activeLayerId = imageLayer.id;
-    drawImportedImage(image, imageLayer, { clearBeforeDraw: false });
-    updateLayerUI();
-    return;
+function beginImagePlacement(image) {
+  const targetMode = imageImportMode.value === "new-layer" ? "new" : "current";
+
+  if (targetMode === "new" && layers.length >= maxLayers) {
+    alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
+    return false;
   }
 
   const activeLayer = getActiveLayer();
+  if (targetMode === "current" && !canDrawOnActiveLayer({ showAlert: true })) {
+    return false;
+  }
 
-  if (!canDrawOnActiveLayer({ showAlert: true })) {
+  const placement = calculateInitialImagePlacement(image);
+  pendingImage = {
+    image,
+    ...placement,
+    targetMode,
+    targetLayerId: targetMode === "current" ? activeLayer.id : null,
+    layerName: targetMode === "new" ? createImageLayerName() : activeLayer.name,
+    isDragging: false,
+    dragOffsetX: 0,
+    dragOffsetY: 0
+  };
+
+  isDrawing = false;
+  lastPoint = null;
+  previousPoint = null;
+  shapeStartPoint = null;
+  setHintVisible(true);
+  updateImagePlacementControls();
+  renderAllLayers();
+  return true;
+}
+
+function isPointInPendingImage(point) {
+  if (!pendingImage) return false;
+
+  return point.x >= pendingImage.x
+    && point.x <= pendingImage.x + pendingImage.width
+    && point.y >= pendingImage.y
+    && point.y <= pendingImage.y + pendingImage.height;
+}
+
+function startPendingImageDrag(event) {
+  const point = getPointerCanvasPoint(event);
+
+  if (!isPointInPendingImage(point)) {
+    setHintVisible(true);
     return;
   }
 
-  drawImportedImage(image, activeLayer, { clearBeforeDraw: true });
+  pendingImage.isDragging = true;
+  pendingImage.dragOffsetX = point.x - pendingImage.x;
+  pendingImage.dragOffsetY = point.y - pendingImage.y;
+  setHintVisible(false);
+
+  try {
+    canvas.setPointerCapture(event.pointerId);
+  } catch (_) {
+    // Pointer Captureが使えない環境でも画像移動自体は継続する。
+  }
+}
+
+function movePendingImage(event) {
+  if (!pendingImage?.isDragging) return;
+  event.preventDefault();
+
+  const point = getPointerCanvasPoint(event);
+  pendingImage.x = point.x - pendingImage.dragOffsetX;
+  pendingImage.y = point.y - pendingImage.dragOffsetY;
+  renderAllLayers();
+}
+
+function stopPendingImageDrag(event) {
+  if (!pendingImage?.isDragging) return;
+  event.preventDefault();
+
+  pendingImage.isDragging = false;
+
+  try {
+    canvas.releasePointerCapture(event.pointerId);
+  } catch (_) {
+    // Pointer Captureが使えない環境では何もしない。
+  }
+
+  renderAllLayers();
+}
+
+function confirmPendingImage() {
+  if (!pendingImage) return;
+
+  if (pendingImage.targetMode === "new" && layers.length >= maxLayers) {
+    alert(`レイヤーは最大${maxLayers}枚までです。不要なレイヤーを削除してください。`);
+    return;
+  }
+
+  const pending = pendingImage;
+  let targetLayer = null;
+  let shouldClearBeforeDraw = false;
+
+  if (pending.targetMode === "new") {
+    targetLayer = createLayer(createImageLayerName());
+    if (!targetLayer) return;
+  } else {
+    targetLayer = layers.find((layer) => layer.id === pending.targetLayerId) || null;
+    shouldClearBeforeDraw = true;
+
+    if (!targetLayer) {
+      alert("画像読込先のレイヤーが見つかりません。画像を取消してから再度読み込んでください。");
+      return;
+    }
+
+    if (!targetLayer.visible) {
+      alert("非表示レイヤーには画像を確定できません。表示に切り替えるか、取消してください。");
+      return;
+    }
+  }
+
+  saveHistory();
+
+  if (pending.targetMode === "new") {
+    layers.push(targetLayer);
+    activeLayerId = targetLayer.id;
+  }
+
+  drawImageToLayer(pending, targetLayer, { clearBeforeDraw: shouldClearBeforeDraw });
+  pendingImage = null;
+  setHintVisible(false);
+  updateImagePlacementControls();
+  renderAllLayers();
+}
+
+function cancelPendingImage() {
+  if (!pendingImage) return;
+
+  pendingImage = null;
+  setHintVisible(shouldShowInitialHint());
+  updateImagePlacementControls();
+  renderAllLayers();
 }
 
 function loadImageFile(event) {
+  if (pendingImage) {
+    alert("画像を確定または取消してください。");
+    imageInput.value = "";
+    return;
+  }
+
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
@@ -1124,19 +1333,7 @@ function loadImageFile(event) {
     const image = new Image();
 
     image.onload = () => {
-      if (imageImportMode.value === "new-layer" && layers.length >= maxLayers) {
-        alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
-        imageInput.value = "";
-        return;
-      }
-
-      if (imageImportMode.value === "current-layer" && !canDrawOnActiveLayer({ showAlert: true })) {
-        imageInput.value = "";
-        return;
-      }
-
-      saveHistory();
-      importImage(image);
+      beginImagePlacement(image);
       imageInput.value = "";
     };
 
@@ -1210,10 +1407,17 @@ backgroundColorInput.addEventListener("change", () => {
 });
 
 loadImageBtn.addEventListener("click", () => {
+  if (pendingImage) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
   imageInput.click();
 });
 
 imageInput.addEventListener("change", loadImageFile);
+confirmImageBtn.addEventListener("click", confirmPendingImage);
+cancelImageBtn.addEventListener("click", cancelPendingImage);
 layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 
 layerSelect.addEventListener("change", () => {
