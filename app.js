@@ -3,6 +3,13 @@ const canvasWrap = document.getElementById("canvasWrap");
 const ctx = canvas.getContext("2d");
 
 const penBtn = document.getElementById("penBtn");
+const markerBtn = document.getElementById("markerBtn");
+const lineBtn = document.getElementById("lineBtn");
+const rectBtn = document.getElementById("rectBtn");
+const ellipseBtn = document.getElementById("ellipseBtn");
+const arrowBtn = document.getElementById("arrowBtn");
+const dashedLineBtn = document.getElementById("dashedLineBtn");
+const textBtn = document.getElementById("textBtn");
 const eraserBtn = document.getElementById("eraserBtn");
 const undoBtn = document.getElementById("undoBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -21,6 +28,7 @@ const imageImportMode = document.getElementById("imageImportMode");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
+const duplicateLayerBtn = document.getElementById("duplicateLayerBtn");
 const deleteLayerBtn = document.getElementById("deleteLayerBtn");
 const renameLayerBtn = document.getElementById("renameLayerBtn");
 const moveLayerUpBtn = document.getElementById("moveLayerUpBtn");
@@ -49,6 +57,7 @@ let backgroundMode = "white";
 let backgroundColor = "#ffffff";
 let lastPoint = null;
 let previousPoint = null;
+let shapeStartPoint = null;
 let canvasWidth = 0;
 let canvasHeight = 0;
 let history = [];
@@ -107,6 +116,8 @@ function resetDisplaySettings() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 1;
+  ctx.setLineDash([]);
 }
 
 function resetLayerDrawingSettings(layerCtx) {
@@ -115,6 +126,8 @@ function resetLayerDrawingSettings(layerCtx) {
   layerCtx.lineJoin = "round";
   layerCtx.imageSmoothingEnabled = true;
   layerCtx.globalCompositeOperation = "source-over";
+  layerCtx.globalAlpha = 1;
+  layerCtx.setLineDash([]);
 }
 
 function clearDisplayCanvas() {
@@ -287,8 +300,19 @@ function updateUndoButton() {
 }
 
 function getToolLabel() {
-  if (currentTool === "eraser") return "消しゴム";
-  return presetColorNames[currentColor.toLowerCase()] || "指定色";
+  const labels = {
+    pen: presetColorNames[currentColor.toLowerCase()] || "指定色",
+    eraser: "消しゴム",
+    marker: "マーカー",
+    line: "直線",
+    rect: "四角",
+    ellipse: "円",
+    arrow: "矢印",
+    dashedLine: "点線",
+    text: "文字"
+  };
+
+  return labels[currentTool] || "ペン";
 }
 
 function updateStatus() {
@@ -304,7 +328,14 @@ function updateStatus() {
 
 function updateToolButtons() {
   penBtn.classList.toggle("active", currentTool === "pen");
+  markerBtn.classList.toggle("active", currentTool === "marker");
   eraserBtn.classList.toggle("active", currentTool === "eraser");
+  lineBtn.classList.toggle("active", currentTool === "line");
+  rectBtn.classList.toggle("active", currentTool === "rect");
+  ellipseBtn.classList.toggle("active", currentTool === "ellipse");
+  arrowBtn.classList.toggle("active", currentTool === "arrow");
+  dashedLineBtn.classList.toggle("active", currentTool === "dashedLine");
+  textBtn.classList.toggle("active", currentTool === "text");
   updateStatus();
 }
 
@@ -324,6 +355,7 @@ function updateLayerUI() {
   const activeIndex = getActiveLayerIndex();
 
   addLayerBtn.disabled = layers.length >= maxLayers;
+  duplicateLayerBtn.disabled = !activeLayer;
   deleteLayerBtn.disabled = layers.length <= 1;
   renameLayerBtn.disabled = !activeLayer;
   toggleLayerVisibilityBtn.disabled = !activeLayer;
@@ -385,20 +417,46 @@ function setBackgroundColor(color, options = {}) {
   updateBackgroundView();
 }
 
-function applyStrokeStyle(targetCtx) {
+function applyStrokeStyle(targetCtx, options = {}) {
+  const tool = options.tool || currentTool;
+
   targetCtx.lineWidth = currentSize;
   targetCtx.lineCap = "round";
   targetCtx.lineJoin = "round";
+  targetCtx.setLineDash([]);
 
-  if (currentTool === "eraser") {
+  if (tool === "eraser") {
     targetCtx.globalCompositeOperation = "destination-out";
+    targetCtx.globalAlpha = 1;
     targetCtx.strokeStyle = "rgba(0, 0, 0, 1)";
     targetCtx.fillStyle = "rgba(0, 0, 0, 1)";
   } else {
     targetCtx.globalCompositeOperation = "source-over";
+    targetCtx.globalAlpha = tool === "marker" ? 0.35 : 1;
     targetCtx.strokeStyle = currentColor;
     targetCtx.fillStyle = currentColor;
   }
+
+  if (tool === "dashedLine") {
+    targetCtx.setLineDash([Math.max(8, currentSize * 2), Math.max(6, currentSize * 1.5)]);
+  }
+}
+
+function resetAfterDrawing(targetCtx) {
+  targetCtx.globalCompositeOperation = "source-over";
+  targetCtx.globalAlpha = 1;
+  targetCtx.setLineDash([]);
+}
+
+function isShapeTool(tool = currentTool) {
+  return ["line", "rect", "ellipse", "arrow", "dashedLine"].includes(tool);
+}
+
+function getTextFontSize() {
+  if (currentSize <= 3) return 16;
+  if (currentSize <= 7) return 24;
+  if (currentSize <= 14) return 36;
+  return 48;
 }
 
 function drawDot(point) {
@@ -409,6 +467,7 @@ function drawDot(point) {
   targetCtx.beginPath();
   targetCtx.arc(point.x, point.y, currentSize / 2, 0, Math.PI * 2);
   targetCtx.fill();
+  resetAfterDrawing(targetCtx);
 }
 
 function drawSmoothLine(point) {
@@ -433,9 +492,76 @@ function drawSmoothLine(point) {
   targetCtx.moveTo(previousPoint.x, previousPoint.y);
   targetCtx.quadraticCurveTo(lastPoint.x, lastPoint.y, midPoint.x, midPoint.y);
   targetCtx.stroke();
+  resetAfterDrawing(targetCtx);
 
   previousPoint = midPoint;
   lastPoint = point;
+}
+
+function drawShape(targetCtx, startPoint, endPoint, tool = currentTool) {
+  applyStrokeStyle(targetCtx, { tool });
+  targetCtx.beginPath();
+
+  if (tool === "rect") {
+    targetCtx.rect(startPoint.x, startPoint.y, endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+    targetCtx.stroke();
+  } else if (tool === "ellipse") {
+    const centerX = (startPoint.x + endPoint.x) / 2;
+    const centerY = (startPoint.y + endPoint.y) / 2;
+    const radiusX = Math.abs(endPoint.x - startPoint.x) / 2;
+    const radiusY = Math.abs(endPoint.y - startPoint.y) / 2;
+    targetCtx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
+    targetCtx.stroke();
+  } else {
+    targetCtx.moveTo(startPoint.x, startPoint.y);
+    targetCtx.lineTo(endPoint.x, endPoint.y);
+    targetCtx.stroke();
+
+    if (tool === "arrow") {
+      const angle = Math.atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+      const headLength = Math.max(14, currentSize * 3);
+      targetCtx.beginPath();
+      targetCtx.moveTo(endPoint.x, endPoint.y);
+      targetCtx.lineTo(endPoint.x - headLength * Math.cos(angle - Math.PI / 6), endPoint.y - headLength * Math.sin(angle - Math.PI / 6));
+      targetCtx.moveTo(endPoint.x, endPoint.y);
+      targetCtx.lineTo(endPoint.x - headLength * Math.cos(angle + Math.PI / 6), endPoint.y - headLength * Math.sin(angle + Math.PI / 6));
+      targetCtx.stroke();
+    }
+  }
+
+  resetAfterDrawing(targetCtx);
+}
+
+function drawShapePreview(endPoint) {
+  if (!shapeStartPoint) return;
+  renderAllLayers();
+  ctx.save();
+  ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+  drawShape(ctx, shapeStartPoint, endPoint);
+  ctx.restore();
+  resetDisplaySettings();
+}
+
+function drawTextAt(point) {
+  const activeLayer = getActiveLayer();
+  if (!activeLayer || !activeLayer.visible) return;
+
+  const text = window.prompt("入力する文字を入力してください。");
+  if (text === null) return;
+
+  const trimmedText = text.trim();
+  if (!trimmedText) return;
+
+  saveHistory();
+  setHintVisible(false);
+
+  const targetCtx = activeLayer.ctx;
+  applyStrokeStyle(targetCtx, { tool: "pen" });
+  targetCtx.font = `${getTextFontSize()}px sans-serif`;
+  targetCtx.textBaseline = "top";
+  targetCtx.fillText(trimmedText, point.x, point.y);
+  resetAfterDrawing(targetCtx);
+  renderAllLayers();
 }
 
 function startDrawing(event) {
@@ -444,12 +570,19 @@ function startDrawing(event) {
   const activeLayer = getActiveLayer();
   if (!activeLayer || !activeLayer.visible) return;
 
+  const point = getPointerPoint(event);
+
+  if (currentTool === "text") {
+    drawTextAt(point);
+    return;
+  }
+
   saveHistory();
   setHintVisible(false);
-
   isDrawing = true;
-  lastPoint = getPointerPoint(event);
-  previousPoint = lastPoint;
+  lastPoint = point;
+  previousPoint = point;
+  shapeStartPoint = isShapeTool() ? point : null;
 
   try {
     canvas.setPointerCapture(event.pointerId);
@@ -457,13 +590,20 @@ function startDrawing(event) {
     // Pointer Captureが使えない環境でも描画自体は継続する。
   }
 
-  drawDot(lastPoint);
+  if (!isShapeTool()) {
+    drawDot(point);
+  }
   renderAllLayers();
 }
 
 function draw(event) {
   if (!isDrawing) return;
   event.preventDefault();
+
+  if (isShapeTool()) {
+    drawShapePreview(getPointerPoint(event));
+    return;
+  }
 
   const events = typeof event.getCoalescedEvents === "function"
     ? event.getCoalescedEvents()
@@ -481,19 +621,23 @@ function stopDrawing(event) {
   event.preventDefault();
 
   const targetCtx = getDrawingContext();
+  const endPoint = getPointerPoint(event);
 
-  if (targetCtx && lastPoint && previousPoint) {
+  if (targetCtx && isShapeTool() && shapeStartPoint) {
+    drawShape(targetCtx, shapeStartPoint, endPoint);
+  } else if (targetCtx && lastPoint && previousPoint) {
     applyStrokeStyle(targetCtx);
     targetCtx.beginPath();
     targetCtx.moveTo(previousPoint.x, previousPoint.y);
     targetCtx.lineTo(lastPoint.x, lastPoint.y);
     targetCtx.stroke();
-    targetCtx.globalCompositeOperation = "source-over";
+    resetAfterDrawing(targetCtx);
   }
 
   isDrawing = false;
   lastPoint = null;
   previousPoint = null;
+  shapeStartPoint = null;
 
   try {
     canvas.releasePointerCapture(event.pointerId);
@@ -552,6 +696,39 @@ function addLayer() {
   layers.push(layer);
   activeLayerId = layer.id;
   nextLayerNumber += 1;
+
+  updateLayerUI();
+  renderAllLayers();
+}
+
+function duplicateActiveLayer() {
+  const activeLayer = getActiveLayer();
+  const index = getActiveLayerIndex();
+
+  if (!activeLayer || index === -1) return;
+
+  if (layers.length >= maxLayers) {
+    alert(`レイヤーは最大${maxLayers}枚までです。不要なレイヤーを削除してください。`);
+    return;
+  }
+
+  const duplicatedLayer = createLayer(`${activeLayer.name} コピー`);
+  if (!duplicatedLayer) return;
+
+  saveHistory();
+
+  duplicatedLayer.visible = activeLayer.visible;
+  duplicatedLayer.opacity = activeLayer.opacity ?? 1;
+  duplicatedLayer.ctx.save();
+  duplicatedLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  duplicatedLayer.ctx.globalCompositeOperation = "source-over";
+  duplicatedLayer.ctx.globalAlpha = 1;
+  duplicatedLayer.ctx.drawImage(activeLayer.canvas, 0, 0);
+  duplicatedLayer.ctx.restore();
+  resetLayerDrawingSettings(duplicatedLayer.ctx);
+
+  layers.splice(index + 1, 0, duplicatedLayer);
+  activeLayerId = duplicatedLayer.id;
 
   updateLayerUI();
   renderAllLayers();
@@ -869,15 +1046,20 @@ function initializeLayers() {
   renderAllLayers();
 }
 
-penBtn.addEventListener("click", () => {
-  currentTool = "pen";
+function setTool(tool) {
+  currentTool = tool;
   updateToolButtons();
-});
+}
 
-eraserBtn.addEventListener("click", () => {
-  currentTool = "eraser";
-  updateToolButtons();
-});
+penBtn.addEventListener("click", () => setTool("pen"));
+markerBtn.addEventListener("click", () => setTool("marker"));
+eraserBtn.addEventListener("click", () => setTool("eraser"));
+lineBtn.addEventListener("click", () => setTool("line"));
+rectBtn.addEventListener("click", () => setTool("rect"));
+ellipseBtn.addEventListener("click", () => setTool("ellipse"));
+arrowBtn.addEventListener("click", () => setTool("arrow"));
+dashedLineBtn.addEventListener("click", () => setTool("dashedLine"));
+textBtn.addEventListener("click", () => setTool("text"));
 
 colorButtons.forEach((button) => {
   button.addEventListener("click", () => setColor(button.dataset.color));
@@ -913,6 +1095,7 @@ layerSelect.addEventListener("change", () => {
 });
 
 addLayerBtn.addEventListener("click", addLayer);
+duplicateLayerBtn.addEventListener("click", duplicateActiveLayer);
 deleteLayerBtn.addEventListener("click", deleteActiveLayer);
 renameLayerBtn.addEventListener("click", renameActiveLayer);
 moveLayerUpBtn.addEventListener("click", moveActiveLayerUp);
