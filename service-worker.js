@@ -1,9 +1,9 @@
-const CACHE_NAME = "tegaki-memo-v9-image-placement-polish";
+const CACHE_NAME = "tegaki-memo-v10-hidden-layer-hint";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=9",
-  "./app.js?v=9",
+  "./style.css?v=10",
+  "./app.js?v=10",
   "./manifest.json",
   "./icons/icon.svg"
 ];

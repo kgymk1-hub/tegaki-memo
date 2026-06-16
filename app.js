@@ -61,6 +61,8 @@ const presetColorNames = {
 const maxHistory = 10;
 const maxLayers = 5;
 const minShapeDistance = 4;
+const hiddenLayerDrawingMessage = "非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。";
+const noDrawableLayerMessage = "描画できるレイヤーがありません。";
 const renderScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
 let isDrawing = false;
@@ -150,7 +152,7 @@ function updateHintText() {
   const activeLayer = getActiveLayer();
 
   if (activeLayer && !activeLayer.visible) {
-    hint.textContent = "非表示レイヤーには描画できません";
+    hint.textContent = hiddenLayerDrawingMessage;
     return;
   }
 
@@ -239,19 +241,31 @@ function getActiveLayerIndex() {
   return layers.findIndex((layer) => layer.id === activeLayerId);
 }
 
-function canDrawOnActiveLayer({ showAlert = false } = {}) {
+function showDrawingUnavailableHint(message) {
+  hint.textContent = message;
+  setHintVisible(true);
+}
+
+function resetDrawingState() {
+  isDrawing = false;
+  lastPoint = null;
+  previousPoint = null;
+  shapeStartPoint = null;
+}
+
+function canDrawOnActiveLayer({ showHint = false } = {}) {
   const activeLayer = getActiveLayer();
 
   if (!activeLayer) {
-    if (showAlert) {
-      alert("描画できるレイヤーがありません。");
+    if (showHint) {
+      showDrawingUnavailableHint(noDrawableLayerMessage);
     }
     return false;
   }
 
   if (!activeLayer.visible) {
-    if (showAlert) {
-      alert("非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。");
+    if (showHint) {
+      showDrawingUnavailableHint(hiddenLayerDrawingMessage);
     }
     return false;
   }
@@ -700,8 +714,8 @@ function drawTextAt(point) {
     setHintVisible(false);
   };
 
-  if (!canDrawOnActiveLayer({ showAlert: true })) {
-    finishTextTool();
+  if (!canDrawOnActiveLayer({ showHint: true })) {
+    resetDrawingState();
     return;
   }
 
@@ -737,12 +751,8 @@ function startDrawing(event) {
     return;
   }
 
-  if (!canDrawOnActiveLayer({ showAlert: true })) {
-    if (currentTool === "text") {
-      setTool("pen");
-    } else {
-      refreshHint();
-    }
+  if (!canDrawOnActiveLayer({ showHint: true })) {
+    resetDrawingState();
     return;
   }
 
@@ -831,10 +841,7 @@ function stopDrawing(event) {
     resetAfterDrawing(targetCtx);
   }
 
-  isDrawing = false;
-  lastPoint = null;
-  previousPoint = null;
-  shapeStartPoint = null;
+  resetDrawingState();
 
   try {
     canvas.releasePointerCapture(event.pointerId);
@@ -1205,7 +1212,8 @@ function beginImagePlacement(image) {
   }
 
   const activeLayer = getActiveLayer();
-  if (targetMode === "current" && !canDrawOnActiveLayer({ showAlert: true })) {
+  if (targetMode === "current" && !canDrawOnActiveLayer({ showHint: true })) {
+    resetDrawingState();
     return false;
   }
 
@@ -1221,10 +1229,7 @@ function beginImagePlacement(image) {
     dragOffsetY: 0
   };
 
-  isDrawing = false;
-  lastPoint = null;
-  previousPoint = null;
-  shapeStartPoint = null;
+  resetDrawingState();
   setHintVisible(true);
   updateImagePlacementControls();
   renderAllLayers();
