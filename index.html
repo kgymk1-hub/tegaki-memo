@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=7" />
-  <script src="app.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=8" />
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
   <header>
@@ -78,6 +78,8 @@
         </label>
 
         <button id="loadImageBtn" type="button">画像読込</button>
+        <button id="confirmImageBtn" class="primary" type="button" disabled>確定</button>
+        <button id="cancelImageBtn" type="button" disabled>取消</button>
         <input id="imageInput" type="file" accept="image/*" hidden />
       </div>
 
