@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
   <link rel="stylesheet" href="style.css" />
   <script src="app.js" defer></script>
@@ -60,7 +62,15 @@
           <input id="backgroundColorInput" type="color" value="#ffffff" />
         </label>
 
-        <button id="loadImageBtn" type="button">画像読込</button>
+        <label>
+          読込先
+          <select id="imageImportMode">
+            <option value="new-layer" selected>新規レイヤー</option>
+            <option value="current-layer">現在レイヤー</option>
+          </select>
+        </label>
+
+        <button id="loadImageBtn" type="button">画像</button>
         <input id="imageInput" type="file" accept="image/*" hidden />
       </div>
 
@@ -77,6 +87,12 @@
         <button id="moveLayerDownBtn" type="button">下へ</button>
         <button id="mergeLayerDownBtn" type="button">下へ結合</button>
         <button id="toggleLayerVisibilityBtn" type="button">非表示</button>
+
+        <label class="opacity-control">
+          透明度
+          <input id="layerOpacityInput" type="range" min="0" max="100" value="100" />
+          <span id="layerOpacityValue">100%</span>
+        </label>
       </div>
     </div>
   </header>
@@ -87,5 +103,12 @@
       <div class="hint" id="hint">指やタッチペンでここに描けます</div>
     </div>
   </main>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
 </body>
 </html>

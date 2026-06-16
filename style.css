@@ -78,7 +78,8 @@ h1 {
 
 button,
 select,
-input[type="color"] {
+input[type="color"],
+input[type="range"] {
   font: inherit;
 }
 
@@ -145,6 +146,17 @@ input[type="color"] {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
+}
+
+input[type="range"] {
+  width: 96px;
+  accent-color: #2563eb;
+}
+
+.opacity-control span {
+  min-width: 38px;
+  color: #4b5563;
+  font-variant-numeric: tabular-nums;
 }
 
 main {
@@ -236,6 +248,10 @@ canvas {
   input[type="color"] {
     width: 36px;
     height: 32px;
+  }
+
+  input[type="range"] {
+    width: 78px;
   }
 
   main {
