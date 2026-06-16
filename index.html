@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=6" />
-  <script src="app.js?v=6" defer></script>
+  <link rel="stylesheet" href="style.css?v=7" />
+  <script src="app.js?v=7" defer></script>
 </head>
 <body>
   <header>
@@ -28,7 +28,7 @@
         <button id="dashedLineBtn" type="button">点線</button>
         <button id="textBtn" type="button">文字</button>
         <button id="undoBtn" type="button" disabled>戻す</button>
-        <button id="clearBtn" class="danger" type="button">レイヤー消去</button>
+        <button id="clearBtn" class="danger" type="button">選択レイヤー消去</button>
         <button id="saveBtn" class="primary" type="button">PNG保存</button>
       </div>
 
@@ -70,14 +70,14 @@
         </label>
 
         <label>
-          読込先
+          画像読込先
           <select id="imageImportMode">
             <option value="new-layer" selected>新規レイヤー</option>
             <option value="current-layer">現在レイヤー</option>
           </select>
         </label>
 
-        <button id="loadImageBtn" type="button">画像</button>
+        <button id="loadImageBtn" type="button">画像読込</button>
         <input id="imageInput" type="file" accept="image/*" hidden />
       </div>
 
@@ -97,7 +97,7 @@
         <button id="toggleLayerVisibilityBtn" type="button">非表示</button>
 
         <label class="opacity-control">
-          透明度
+          選択レイヤー透明度
           <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
           <span id="layerOpacityValue">100%</span>
         </label>
