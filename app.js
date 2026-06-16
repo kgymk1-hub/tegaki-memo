@@ -90,6 +90,22 @@ function setHintVisible(visible) {
   hint.classList.toggle("hidden", !visible);
 }
 
+function getToolHintText(tool = currentTool) {
+  if (isShapeTool(tool)) {
+    return "キャンバス上でドラッグして描画します";
+  }
+
+  if (tool === "text") {
+    return "文字を入れたい位置をタップしてください";
+  }
+
+  return "指やタッチペンでここに描けます";
+}
+
+function updateHintText() {
+  hint.textContent = getToolHintText();
+}
+
 function createLayerId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
@@ -288,6 +304,7 @@ function restoreHistoryItem(item) {
   backgroundColor = item.backgroundColor ?? "#ffffff";
   backgroundModeSelect.value = backgroundMode;
   backgroundColorInput.value = backgroundColor;
+  updateHintText();
   setHintVisible(item.hintVisible);
   updateBackgroundView();
 
@@ -355,7 +372,7 @@ function updateLayerUI() {
   const activeIndex = getActiveLayerIndex();
 
   addLayerBtn.disabled = layers.length >= maxLayers;
-  duplicateLayerBtn.disabled = !activeLayer;
+  duplicateLayerBtn.disabled = !activeLayer || !activeLayer.visible || layers.length >= maxLayers;
   deleteLayerBtn.disabled = layers.length <= 1;
   renameLayerBtn.disabled = !activeLayer;
   toggleLayerVisibilityBtn.disabled = !activeLayer;
@@ -383,7 +400,10 @@ function updateLayerUI() {
 function setColor(color) {
   currentColor = color;
   customColor.value = color;
-  currentTool = "pen";
+
+  if (currentTool === "eraser") {
+    currentTool = "pen";
+  }
 
   colorButtons.forEach((button) => {
     const isSelected = button.dataset.color.toLowerCase() === color.toLowerCase();
@@ -446,6 +466,25 @@ function resetAfterDrawing(targetCtx) {
   targetCtx.globalCompositeOperation = "source-over";
   targetCtx.globalAlpha = 1;
   targetCtx.setLineDash([]);
+}
+
+function isLayerCanvasEmpty(layer) {
+  if (!layer?.canvas?.width || !layer?.canvas?.height) return true;
+
+  const imageData = layer.ctx.getImageData(0, 0, layer.canvas.width, layer.canvas.height);
+  const pixels = imageData.data;
+
+  for (let index = 3; index < pixels.length; index += 4) {
+    if (pixels[index] !== 0) return false;
+  }
+
+  return true;
+}
+
+function areVisibleLayersEmpty() {
+  return layers
+    .filter((layer) => layer.visible)
+    .every((layer) => isLayerCanvasEmpty(layer));
 }
 
 function isShapeTool(tool = currentTool) {
@@ -669,12 +708,13 @@ function clearCanvas() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;
 
-  const ok = window.confirm("現在のレイヤーを全消去しますか？");
+  const ok = window.confirm("現在のレイヤーを消去しますか？");
   if (!ok) return;
 
   saveHistory();
   clearActiveLayer();
-  setHintVisible(true);
+  updateHintText();
+  setHintVisible(areVisibleLayersEmpty());
 }
 
 function undo() {
@@ -712,12 +752,17 @@ function duplicateActiveLayer() {
     return;
   }
 
+  if (!activeLayer.visible) {
+    alert("表示中のレイヤーのみ複製できます。");
+    return;
+  }
+
   const duplicatedLayer = createLayer(`${activeLayer.name} コピー`);
   if (!duplicatedLayer) return;
 
   saveHistory();
 
-  duplicatedLayer.visible = activeLayer.visible;
+  duplicatedLayer.visible = true;
   duplicatedLayer.opacity = activeLayer.opacity ?? 1;
   duplicatedLayer.ctx.save();
   duplicatedLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1048,6 +1093,8 @@ function initializeLayers() {
 
 function setTool(tool) {
   currentTool = tool;
+  updateHintText();
+  setHintVisible(true);
   updateToolButtons();
 }
 
@@ -1125,6 +1172,7 @@ if ("serviceWorker" in navigator) {
 
 resizeCanvasIfNeeded();
 initializeLayers();
+updateHintText();
 updateToolButtons();
 updateUndoButton();
 updateBackgroundView();

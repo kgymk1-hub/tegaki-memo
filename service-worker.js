@@ -1,4 +1,4 @@
-const CACHE_NAME = "tegaki-memo-v4-tools-and-duplicate-layer";
+const CACHE_NAME = "tegaki-memo-v5-ui-polish";
 const APP_SHELL = [
   "./",
   "./index.html",
