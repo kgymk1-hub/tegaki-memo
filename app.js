@@ -21,6 +21,7 @@ const imageInput = document.getElementById("imageInput");
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
 const deleteLayerBtn = document.getElementById("deleteLayerBtn");
+const renameLayerBtn = document.getElementById("renameLayerBtn");
 const moveLayerUpBtn = document.getElementById("moveLayerUpBtn");
 const moveLayerDownBtn = document.getElementById("moveLayerDownBtn");
 const mergeLayerDownBtn = document.getElementById("mergeLayerDownBtn");
@@ -309,13 +310,11 @@ function updateLayerUI() {
 
   addLayerBtn.disabled = layers.length >= maxLayers;
   deleteLayerBtn.disabled = layers.length <= 1;
+  renameLayerBtn.disabled = !activeLayer;
   toggleLayerVisibilityBtn.disabled = !activeLayer;
   moveLayerUpBtn.disabled = !activeLayer || activeIndex === layers.length - 1;
   moveLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
-
-  if (mergeLayerDownBtn) {
-    mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
-  }
+  mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -544,6 +543,29 @@ function deleteActiveLayer() {
 
   const nextActiveLayer = layers[index - 1] || layers[index] || layers[0];
   activeLayerId = nextActiveLayer ? nextActiveLayer.id : null;
+
+  updateLayerUI();
+  renderAllLayers();
+}
+
+function renameActiveLayer() {
+  const activeLayer = getActiveLayer();
+  if (!activeLayer) return;
+
+  const newName = window.prompt("新しいレイヤー名を入力してください。", activeLayer.name);
+
+  if (newName === null) return;
+
+  const trimmedName = newName.trim();
+
+  if (!trimmedName) {
+    alert("レイヤー名は空欄にできません。");
+    return;
+  }
+
+  saveHistory();
+
+  activeLayer.name = trimmedName;
 
   updateLayerUI();
   renderAllLayers();
@@ -794,13 +816,10 @@ layerSelect.addEventListener("change", () => {
 
 addLayerBtn.addEventListener("click", addLayer);
 deleteLayerBtn.addEventListener("click", deleteActiveLayer);
+renameLayerBtn.addEventListener("click", renameActiveLayer);
 moveLayerUpBtn.addEventListener("click", moveActiveLayerUp);
 moveLayerDownBtn.addEventListener("click", moveActiveLayerDown);
-
-if (mergeLayerDownBtn) {
-  mergeLayerDownBtn.addEventListener("click", mergeActiveLayerDown);
-}
-
+mergeLayerDownBtn.addEventListener("click", mergeActiveLayerDown);
 toggleLayerVisibilityBtn.addEventListener("click", toggleActiveLayerVisibility);
 
 clearBtn.addEventListener("click", clearCanvas);
