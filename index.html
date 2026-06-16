@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>手書きメモ</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="title-row">
+      <h1>手書きメモ</h1>
+      <div class="status" id="status">ペン：黒 / 太さ：普通</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tool-row" aria-label="描画ツール">
+        <button id="penBtn" class="active" type="button">ペン</button>
+        <button id="eraserBtn" type="button">消しゴム</button>
+        <button id="undoBtn" type="button" disabled>戻す</button>
+        <button id="clearBtn" class="danger" type="button">全消去</button>
+        <button id="saveBtn" class="primary" type="button">PNG保存</button>
+      </div>
+
+      <div class="tool-row" aria-label="色と太さ">
+        <button class="colorBtn active" type="button" data-color="#111827">黒</button>
+        <button class="colorBtn" type="button" data-color="#dc2626">赤</button>
+        <button class="colorBtn" type="button" data-color="#2563eb">青</button>
+        <button class="colorBtn" type="button" data-color="#16a34a">緑</button>
+
+        <label>
+          色
+          <input id="customColor" type="color" value="#111827" />
+        </label>
+
+        <label>
+          太さ
+          <select id="sizeSelect">
+            <option value="3">細い</option>
+            <option value="7" selected>普通</option>
+            <option value="14">太い</option>
+            <option value="24">極太</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="tool-row" aria-label="背景と画像">
+        <label>
+          背景
+          <select id="backgroundModeSelect">
+            <option value="white" selected>白</option>
+            <option value="color">色</option>
+            <option value="transparent">透明</option>
+          </select>
+        </label>
+
+        <label>
+          背景色
+          <input id="backgroundColorInput" type="color" value="#ffffff" />
+        </label>
+
+        <button id="loadImageBtn" type="button">画像読込</button>
+        <input id="imageInput" type="file" accept="image/*" hidden />
+      </div>
+
+      <div class="tool-row" aria-label="レイヤー操作">
+        <label>
+          レイヤー
+          <select id="layerSelect"></select>
+        </label>
+
+        <button id="addLayerBtn" type="button">追加</button>
+        <button id="deleteLayerBtn" type="button">削除</button>
+        <button id="moveLayerUpBtn" type="button">上へ</button>
+        <button id="moveLayerDownBtn" type="button">下へ</button>
+        <button id="mergeLayerDownBtn" type="button">下へ結合</button>
+        <button id="toggleLayerVisibilityBtn" type="button">非表示</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="drawingCanvas"></canvas>
+      <div class="hint" id="hint">指やタッチペンでここに描けます</div>
+    </div>
+  </main>
+</body>
+</html>
