@@ -47,6 +47,7 @@ const presetColorNames = {
 
 const maxHistory = 10;
 const maxLayers = 5;
+const minShapeDistance = 4;
 const renderScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
 let isDrawing = false;
@@ -583,16 +584,30 @@ function drawShapePreview(endPoint) {
 
 function drawTextAt(point) {
   const activeLayer = getActiveLayer();
-  if (!activeLayer || !activeLayer.visible) return;
+
+  const finishTextTool = () => {
+    setTool("pen");
+    setHintVisible(false);
+  };
+
+  if (!activeLayer || !activeLayer.visible) {
+    finishTextTool();
+    return;
+  }
 
   const text = window.prompt("入力する文字を入力してください。");
-  if (text === null) return;
+  if (text === null) {
+    finishTextTool();
+    return;
+  }
 
   const trimmedText = text.trim();
-  if (!trimmedText) return;
+  if (!trimmedText) {
+    finishTextTool();
+    return;
+  }
 
   saveHistory();
-  setHintVisible(false);
 
   const targetCtx = activeLayer.ctx;
   applyStrokeStyle(targetCtx, { tool: "pen" });
@@ -601,6 +616,7 @@ function drawTextAt(point) {
   targetCtx.fillText(trimmedText, point.x, point.y);
   resetAfterDrawing(targetCtx);
   renderAllLayers();
+  finishTextTool();
 }
 
 function startDrawing(event) {
@@ -616,7 +632,10 @@ function startDrawing(event) {
     return;
   }
 
-  saveHistory();
+  if (!isShapeTool()) {
+    saveHistory();
+  }
+
   setHintVisible(false);
   isDrawing = true;
   lastPoint = point;
@@ -655,6 +674,11 @@ function draw(event) {
   renderAllLayers();
 }
 
+function getPointDistance(startPoint, endPoint) {
+  if (!startPoint || !endPoint) return 0;
+  return Math.hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+}
+
 function stopDrawing(event) {
   if (!isDrawing) return;
   event.preventDefault();
@@ -663,7 +687,10 @@ function stopDrawing(event) {
   const endPoint = getPointerPoint(event);
 
   if (targetCtx && isShapeTool() && shapeStartPoint) {
-    drawShape(targetCtx, shapeStartPoint, endPoint);
+    if (getPointDistance(shapeStartPoint, endPoint) >= minShapeDistance) {
+      saveHistory();
+      drawShape(targetCtx, shapeStartPoint, endPoint);
+    }
   } else if (targetCtx && lastPoint && previousPoint) {
     applyStrokeStyle(targetCtx);
     targetCtx.beginPath();
@@ -1094,7 +1121,13 @@ function initializeLayers() {
 function setTool(tool) {
   currentTool = tool;
   updateHintText();
-  setHintVisible(true);
+
+  if (isShapeTool(tool) || tool === "text") {
+    setHintVisible(true);
+  } else {
+    setHintVisible(areVisibleLayersEmpty());
+  }
+
   updateToolButtons();
 }
 
