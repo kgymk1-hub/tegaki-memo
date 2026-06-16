@@ -103,8 +103,30 @@ function getToolHintText(tool = currentTool) {
   return "指やタッチペンでここに描けます";
 }
 
+function shouldShowInitialHint() {
+  const activeLayer = getActiveLayer();
+
+  if (!activeLayer) return true;
+  if (!activeLayer.visible) return true;
+  if (isShapeTool() || currentTool === "text") return true;
+
+  return areVisibleLayersEmpty();
+}
+
 function updateHintText() {
+  const activeLayer = getActiveLayer();
+
+  if (activeLayer && !activeLayer.visible) {
+    hint.textContent = "非表示レイヤーには描画できません";
+    return;
+  }
+
   hint.textContent = getToolHintText();
+}
+
+function refreshHint() {
+  updateHintText();
+  setHintVisible(shouldShowInitialHint());
 }
 
 function createLayerId() {
@@ -184,9 +206,29 @@ function getActiveLayerIndex() {
   return layers.findIndex((layer) => layer.id === activeLayerId);
 }
 
+function canDrawOnActiveLayer({ showAlert = false } = {}) {
+  const activeLayer = getActiveLayer();
+
+  if (!activeLayer) {
+    if (showAlert) {
+      alert("描画できるレイヤーがありません。");
+    }
+    return false;
+  }
+
+  if (!activeLayer.visible) {
+    if (showAlert) {
+      alert("非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。");
+    }
+    return false;
+  }
+
+  return true;
+}
+
 function getDrawingContext() {
   const activeLayer = getActiveLayer();
-  if (!activeLayer || !activeLayer.visible) return null;
+  if (!canDrawOnActiveLayer()) return null;
   return activeLayer.ctx;
 }
 
@@ -306,7 +348,7 @@ function restoreHistoryItem(item) {
   backgroundModeSelect.value = backgroundMode;
   backgroundColorInput.value = backgroundColor;
   updateHintText();
-  setHintVisible(item.hintVisible);
+  setHintVisible(item.hintVisible || shouldShowInitialHint());
   updateBackgroundView();
 
   renderAllLayers();
@@ -395,6 +437,7 @@ function updateLayerUI() {
   }
 
   updateUndoButton();
+  refreshHint();
   updateStatus();
 }
 
@@ -590,7 +633,7 @@ function drawTextAt(point) {
     setHintVisible(false);
   };
 
-  if (!activeLayer || !activeLayer.visible) {
+  if (!canDrawOnActiveLayer({ showAlert: true })) {
     finishTextTool();
     return;
   }
@@ -622,8 +665,14 @@ function drawTextAt(point) {
 function startDrawing(event) {
   event.preventDefault();
 
-  const activeLayer = getActiveLayer();
-  if (!activeLayer || !activeLayer.visible) return;
+  if (!canDrawOnActiveLayer({ showAlert: true })) {
+    if (currentTool === "text") {
+      setTool("pen");
+    } else {
+      refreshHint();
+    }
+    return;
+  }
 
   const point = getPointerPoint(event);
 
@@ -919,6 +968,7 @@ function toggleActiveLayerVisibility() {
   activeLayer.visible = !activeLayer.visible;
 
   updateLayerUI();
+  refreshHint();
   renderAllLayers();
 }
 
@@ -1051,8 +1101,7 @@ function importImage(image) {
 
   const activeLayer = getActiveLayer();
 
-  if (!activeLayer || !activeLayer.visible) {
-    alert("表示中のレイヤーを選択してから画像を読み込んでください。");
+  if (!canDrawOnActiveLayer({ showAlert: true })) {
     return;
   }
 
@@ -1077,6 +1126,11 @@ function loadImageFile(event) {
     image.onload = () => {
       if (imageImportMode.value === "new-layer" && layers.length >= maxLayers) {
         alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
+        imageInput.value = "";
+        return;
+      }
+
+      if (imageImportMode.value === "current-layer" && !canDrawOnActiveLayer({ showAlert: true })) {
         imageInput.value = "";
         return;
       }
@@ -1120,14 +1174,7 @@ function initializeLayers() {
 
 function setTool(tool) {
   currentTool = tool;
-  updateHintText();
-
-  if (isShapeTool(tool) || tool === "text") {
-    setHintVisible(true);
-  } else {
-    setHintVisible(areVisibleLayersEmpty());
-  }
-
+  refreshHint();
   updateToolButtons();
 }
 
@@ -1172,6 +1219,7 @@ layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 layerSelect.addEventListener("change", () => {
   activeLayerId = layerSelect.value;
   updateLayerUI();
+  refreshHint();
 });
 
 addLayerBtn.addEventListener("click", addLayer);
