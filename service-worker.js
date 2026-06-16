@@ -1,4 +1,4 @@
-const CACHE_NAME = "tegaki-memo-v2-pwa-layer-opacity";
+const CACHE_NAME = "tegaki-memo-v3-tools-and-duplicate-layer";
 const APP_SHELL = [
   "./",
   "./index.html",
