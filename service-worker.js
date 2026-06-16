@@ -1,4 +1,4 @@
-const CACHE_NAME = "tegaki-memo-v1";
+const CACHE_NAME = "tegaki-memo-v2-pwa-layer-opacity";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -8,7 +8,7 @@
 https://kgymk1-hub.github.io/tegaki-memo/
 ```
 
-## 主な機能
+## 実装済み機能
 
 - canvas への手書き描画
 - ペン / 消しゴム
@@ -59,14 +59,21 @@ https://kgymk1-hub.github.io/tegaki-memo/
 
 ```text
 tegaki-memo/
-├─ index.html         # 画面構造、PWA manifest / service worker 登録
+├─ index.html         # 画面構造、PWA manifest / theme-color 読み込み
 ├─ style.css          # レイアウト・見た目・スマホ向け調整
-├─ app.js             # 描画処理・Undo・背景・画像読込・レイヤー管理・PNG保存
+├─ app.js             # 描画処理・Undo・背景・画像読込・レイヤー管理・PNG保存・service worker 登録
 ├─ manifest.json      # PWA設定
 ├─ service-worker.js  # キャッシュ制御
 └─ icons/
    └─ icon.svg        # PWAアイコン
 ```
+
+## PWAとしての使い方
+
+- GitHub Pages URLをブラウザで開き、ブラウザの「ホーム画面に追加」または「アプリをインストール」から追加できます。
+- `manifest.json` と `service-worker.js` は相対パスで読み込むため、GitHub Pages のサブディレクトリ配信でも動作します。
+- service worker はアプリシェル（HTML / CSS / JavaScript / manifest / SVGアイコン）をキャッシュするため、一度開いた後はオフラインでも起動しやすくなります。
+- 更新が反映されない場合は、ブラウザのサイトデータ・キャッシュを削除するか、ホーム画面に追加したPWAを一度削除して再追加してください。
 
 ## 動作確認チェックリスト
 

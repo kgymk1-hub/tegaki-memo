@@ -330,7 +330,8 @@ function updateLayerUI() {
   layerOpacityInput.disabled = !activeLayer;
   moveLayerUpBtn.disabled = !activeLayer || activeIndex === layers.length - 1;
   moveLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
-  mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
+  const lowerLayer = activeIndex > 0 ? layers[activeIndex - 1] : null;
+  mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -676,7 +677,7 @@ function updateActiveLayerOpacity() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;
 
-  const opacity = Number(layerOpacityInput.value) / 100;
+  const opacity = Math.max(0.1, Number(layerOpacityInput.value) / 100);
   if (opacity === (activeLayer.opacity ?? 1)) return;
 
   saveHistory();
@@ -930,6 +931,14 @@ canvas.addEventListener("pointercancel", stopDrawing, { passive: false });
 canvas.addEventListener("pointerleave", stopDrawing, { passive: false });
 
 window.addEventListener("resize", resizeCanvasIfNeeded);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+      console.warn("Service Worker registration failed:", error);
+    });
+  });
+}
 
 resizeCanvasIfNeeded();
 initializeLayers();

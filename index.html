@@ -90,7 +90,7 @@
 
         <label class="opacity-control">
           透明度
-          <input id="layerOpacityInput" type="range" min="0" max="100" value="100" />
+          <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
           <span id="layerOpacityValue">100%</span>
         </label>
       </div>
@@ -103,12 +103,5 @@
       <div class="hint" id="hint">指やタッチペンでここに描けます</div>
     </div>
   </main>
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-      });
-    }
-  </script>
 </body>
 </html>
