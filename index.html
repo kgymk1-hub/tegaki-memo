@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=8" />
-  <script src="app.js?v=8" defer></script>
+  <link rel="stylesheet" href="style.css?v=9" />
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
   <header>
@@ -18,15 +18,15 @@
 
     <div class="toolbar">
       <div class="tool-row" aria-label="描画ツール">
-        <button id="penBtn" class="active" type="button">ペン</button>
-        <button id="markerBtn" type="button">マーカー</button>
-        <button id="eraserBtn" type="button">消しゴム</button>
-        <button id="lineBtn" type="button">直線</button>
-        <button id="rectBtn" type="button">四角</button>
-        <button id="ellipseBtn" type="button">円</button>
-        <button id="arrowBtn" type="button">矢印</button>
-        <button id="dashedLineBtn" type="button">点線</button>
-        <button id="textBtn" type="button">文字</button>
+        <button id="penBtn" data-tool="pen" class="active" type="button">ペン</button>
+        <button id="markerBtn" data-tool="marker" type="button">マーカー</button>
+        <button id="eraserBtn" data-tool="eraser" type="button">消しゴム</button>
+        <button id="lineBtn" data-tool="line" type="button">直線</button>
+        <button id="rectBtn" data-tool="rect" type="button">四角</button>
+        <button id="ellipseBtn" data-tool="ellipse" type="button">円</button>
+        <button id="arrowBtn" data-tool="arrow" type="button">矢印</button>
+        <button id="dashedLineBtn" data-tool="dashedLine" type="button">点線</button>
+        <button id="textBtn" data-tool="text" type="button">文字</button>
         <button id="undoBtn" type="button" disabled>戻す</button>
         <button id="clearBtn" class="danger" type="button">選択レイヤー消去</button>
         <button id="saveBtn" class="primary" type="button">PNG保存</button>

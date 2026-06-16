@@ -19,6 +19,17 @@ const sizeSelect = document.getElementById("sizeSelect");
 const status = document.getElementById("status");
 const hint = document.getElementById("hint");
 const colorButtons = Array.from(document.querySelectorAll(".colorBtn"));
+const toolButtons = [
+  penBtn,
+  markerBtn,
+  eraserBtn,
+  lineBtn,
+  rectBtn,
+  ellipseBtn,
+  arrowBtn,
+  dashedLineBtn,
+  textBtn
+];
 
 const backgroundModeSelect = document.getElementById("backgroundModeSelect");
 const backgroundColorInput = document.getElementById("backgroundColorInput");
@@ -114,8 +125,12 @@ function getToolHintText(tool = currentTool) {
   return "指やタッチペンでここに描けます";
 }
 
+function isPlacingImage() {
+  return Boolean(pendingImage);
+}
+
 function shouldShowInitialHint() {
-  if (pendingImage) return true;
+  if (isPlacingImage()) return true;
 
   const activeLayer = getActiveLayer();
 
@@ -325,6 +340,7 @@ function resizeCanvasIfNeeded() {
   canvas.style.height = `${canvasHeight}px`;
 
   resizeLayerCanvases();
+  recenterPendingImage();
   renderAllLayers();
 }
 
@@ -435,15 +451,13 @@ function updateStatus() {
 }
 
 function updateToolButtons() {
-  penBtn.classList.toggle("active", currentTool === "pen");
-  markerBtn.classList.toggle("active", currentTool === "marker");
-  eraserBtn.classList.toggle("active", currentTool === "eraser");
-  lineBtn.classList.toggle("active", currentTool === "line");
-  rectBtn.classList.toggle("active", currentTool === "rect");
-  ellipseBtn.classList.toggle("active", currentTool === "ellipse");
-  arrowBtn.classList.toggle("active", currentTool === "arrow");
-  dashedLineBtn.classList.toggle("active", currentTool === "dashedLine");
-  textBtn.classList.toggle("active", currentTool === "text");
+  const placingImage = isPlacingImage();
+
+  toolButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.tool === currentTool);
+    button.disabled = placingImage;
+  });
+
   updateStatus();
 }
 
@@ -462,21 +476,21 @@ function updateLayerUI() {
   const activeLayer = getActiveLayer();
   const activeIndex = getActiveLayerIndex();
 
-  const isPlacingImage = Boolean(pendingImage);
+  const placingImage = isPlacingImage();
 
-  addLayerBtn.disabled = isPlacingImage || layers.length >= maxLayers;
-  duplicateLayerBtn.disabled = isPlacingImage || !activeLayer || !activeLayer.visible || layers.length >= maxLayers;
-  deleteLayerBtn.disabled = isPlacingImage || layers.length <= 1;
-  renameLayerBtn.disabled = isPlacingImage || !activeLayer;
-  toggleLayerVisibilityBtn.disabled = isPlacingImage || !activeLayer;
-  layerOpacityInput.disabled = isPlacingImage || !activeLayer;
-  moveLayerUpBtn.disabled = isPlacingImage || !activeLayer || activeIndex === layers.length - 1;
-  moveLayerDownBtn.disabled = isPlacingImage || !activeLayer || activeIndex <= 0;
+  addLayerBtn.disabled = placingImage || layers.length >= maxLayers;
+  duplicateLayerBtn.disabled = placingImage || !activeLayer || !activeLayer.visible || layers.length >= maxLayers;
+  deleteLayerBtn.disabled = placingImage || layers.length <= 1;
+  renameLayerBtn.disabled = placingImage || !activeLayer;
+  toggleLayerVisibilityBtn.disabled = placingImage || !activeLayer;
+  layerOpacityInput.disabled = placingImage || !activeLayer;
+  moveLayerUpBtn.disabled = placingImage || !activeLayer || activeIndex === layers.length - 1;
+  moveLayerDownBtn.disabled = placingImage || !activeLayer || activeIndex <= 0;
   const lowerLayer = activeIndex > 0 ? layers[activeIndex - 1] : null;
-  mergeLayerDownBtn.disabled = isPlacingImage || !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
-  layerSelect.disabled = isPlacingImage;
-  confirmImageBtn.disabled = !isPlacingImage;
-  cancelImageBtn.disabled = !isPlacingImage;
+  mergeLayerDownBtn.disabled = placingImage || !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
+  layerSelect.disabled = placingImage;
+  confirmImageBtn.disabled = !placingImage;
+  cancelImageBtn.disabled = !placingImage;
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -1144,15 +1158,17 @@ function drawImageToLayer(pending, targetLayer, options = {}) {
 }
 
 function updateImagePlacementControls() {
-  const isPlacingImage = Boolean(pendingImage);
-  confirmImageBtn.disabled = !isPlacingImage;
-  cancelImageBtn.disabled = !isPlacingImage;
+  const placingImage = isPlacingImage();
+  confirmImageBtn.disabled = !placingImage;
+  cancelImageBtn.disabled = !placingImage;
   loadImageBtn.disabled = false;
-  imageImportMode.disabled = isPlacingImage;
+  imageImportMode.disabled = placingImage;
+  updateToolButtons();
   updateLayerUI();
+  refreshHint();
 }
 
-function calculateInitialImagePlacement(image) {
+function calculateFittedImageRect(image) {
   const scale = Math.min(
     canvas.width / image.naturalWidth,
     canvas.height / image.naturalHeight,
@@ -1169,6 +1185,17 @@ function calculateInitialImagePlacement(image) {
   };
 }
 
+function recenterPendingImage() {
+  if (!pendingImage) return;
+
+  const placement = calculateFittedImageRect(pendingImage.image);
+  pendingImage.x = placement.x;
+  pendingImage.y = placement.y;
+  pendingImage.width = placement.width;
+  pendingImage.height = placement.height;
+  pendingImage.isDragging = false;
+}
+
 function beginImagePlacement(image) {
   const targetMode = imageImportMode.value === "new-layer" ? "new" : "current";
 
@@ -1182,7 +1209,7 @@ function beginImagePlacement(image) {
     return false;
   }
 
-  const placement = calculateInitialImagePlacement(image);
+  const placement = calculateFittedImageRect(image);
   pendingImage = {
     image,
     ...placement,
@@ -1370,6 +1397,8 @@ function initializeLayers() {
 }
 
 function setTool(tool) {
+  if (isPlacingImage()) return;
+
   currentTool = tool;
   refreshHint();
   updateToolButtons();
