@@ -17,6 +17,7 @@ const backgroundModeSelect = document.getElementById("backgroundModeSelect");
 const backgroundColorInput = document.getElementById("backgroundColorInput");
 const loadImageBtn = document.getElementById("loadImageBtn");
 const imageInput = document.getElementById("imageInput");
+const imageImportMode = document.getElementById("imageImportMode");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
@@ -26,6 +27,8 @@ const moveLayerUpBtn = document.getElementById("moveLayerUpBtn");
 const moveLayerDownBtn = document.getElementById("moveLayerDownBtn");
 const mergeLayerDownBtn = document.getElementById("mergeLayerDownBtn");
 const toggleLayerVisibilityBtn = document.getElementById("toggleLayerVisibilityBtn");
+const layerOpacityInput = document.getElementById("layerOpacityInput");
+const layerOpacityValue = document.getElementById("layerOpacityValue");
 
 const presetColorNames = {
   "#111827": "黒",
@@ -138,7 +141,8 @@ function createLayer(name) {
     name,
     canvas: layerCanvas,
     ctx: layerCtx,
-    visible: true
+    visible: true,
+    opacity: 1
   };
 }
 
@@ -165,7 +169,9 @@ function renderAllLayers() {
 
   layers.forEach((layer) => {
     if (!layer.visible) return;
+    ctx.globalAlpha = layer.opacity ?? 1;
     ctx.drawImage(layer.canvas, 0, 0);
+    ctx.globalAlpha = 1;
   });
 
   ctx.restore();
@@ -212,6 +218,7 @@ function createLayersSnapshot() {
     id: layer.id,
     name: layer.name,
     visible: layer.visible,
+    opacity: layer.opacity ?? 1,
     canvas: createSnapshotFromCanvas(layer.canvas)
   }));
 }
@@ -221,7 +228,9 @@ function saveHistory() {
     layersSnapshot: createLayersSnapshot(),
     activeLayerId,
     hintVisible: isHintVisible(),
-    nextLayerNumber
+    nextLayerNumber,
+    backgroundMode,
+    backgroundColor
   });
 
   if (history.length > maxHistory) history.shift();
@@ -253,6 +262,7 @@ function restoreHistoryItem(item) {
         id: layerSnapshot.id,
         name: layerSnapshot.name,
         visible: layerSnapshot.visible,
+        opacity: layerSnapshot.opacity ?? 1,
         canvas: layerCanvas,
         ctx: layerCtx
       };
@@ -261,7 +271,12 @@ function restoreHistoryItem(item) {
 
   activeLayerId = item.activeLayerId;
   nextLayerNumber = item.nextLayerNumber;
+  backgroundMode = item.backgroundMode ?? "white";
+  backgroundColor = item.backgroundColor ?? "#ffffff";
+  backgroundModeSelect.value = backgroundMode;
+  backgroundColorInput.value = backgroundColor;
   setHintVisible(item.hintVisible);
+  updateBackgroundView();
 
   renderAllLayers();
   updateLayerUI();
@@ -312,14 +327,20 @@ function updateLayerUI() {
   deleteLayerBtn.disabled = layers.length <= 1;
   renameLayerBtn.disabled = !activeLayer;
   toggleLayerVisibilityBtn.disabled = !activeLayer;
+  layerOpacityInput.disabled = !activeLayer;
   moveLayerUpBtn.disabled = !activeLayer || activeIndex === layers.length - 1;
   moveLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
   mergeLayerDownBtn.disabled = !activeLayer || activeIndex <= 0;
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
+    const opacityPercent = Math.round((activeLayer.opacity ?? 1) * 100);
+    layerOpacityInput.value = opacityPercent;
+    layerOpacityValue.textContent = `${opacityPercent}%`;
   } else {
     toggleLayerVisibilityBtn.textContent = "表示";
+    layerOpacityInput.value = 100;
+    layerOpacityValue.textContent = "100%";
   }
 
   updateUndoButton();
@@ -351,12 +372,14 @@ function updateBackgroundView() {
   }
 }
 
-function setBackgroundMode(mode) {
+function setBackgroundMode(mode, options = {}) {
+  if (!options.skipHistory && mode !== backgroundMode) saveHistory();
   backgroundMode = mode;
   updateBackgroundView();
 }
 
-function setBackgroundColor(color) {
+function setBackgroundColor(color, options = {}) {
+  if (!options.skipHistory && color !== backgroundColor) saveHistory();
   backgroundColor = color;
   updateBackgroundView();
 }
@@ -520,6 +543,8 @@ function undo() {
 function addLayer() {
   if (layers.length >= maxLayers) return;
 
+  saveHistory();
+
   const layer = createLayer(String(nextLayerNumber));
   if (!layer) return;
 
@@ -604,6 +629,16 @@ function mergeActiveLayerDown() {
 
   if (!activeLayer || !lowerLayer) return;
 
+  if (!activeLayer.visible) {
+    alert("非表示のレイヤーは下へ結合できません。");
+    return;
+  }
+
+  if (!lowerLayer.visible) {
+    alert("結合先の下レイヤーが非表示のため、下へ結合できません。");
+    return;
+  }
+
   const ok = window.confirm("現在のレイヤーを下のレイヤーへ結合しますか？");
   if (!ok) return;
 
@@ -612,7 +647,9 @@ function mergeActiveLayerDown() {
   lowerLayer.ctx.save();
   lowerLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
   lowerLayer.ctx.globalCompositeOperation = "source-over";
+  lowerLayer.ctx.globalAlpha = activeLayer.opacity ?? 1;
   lowerLayer.ctx.drawImage(activeLayer.canvas, 0, 0);
+  lowerLayer.ctx.globalAlpha = 1;
   lowerLayer.ctx.restore();
   resetLayerDrawingSettings(lowerLayer.ctx);
 
@@ -627,10 +664,27 @@ function toggleActiveLayerVisibility() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;
 
+  saveHistory();
+
   activeLayer.visible = !activeLayer.visible;
 
   updateLayerUI();
   renderAllLayers();
+}
+
+function updateActiveLayerOpacity() {
+  const activeLayer = getActiveLayer();
+  if (!activeLayer) return;
+
+  const opacity = Number(layerOpacityInput.value) / 100;
+  if (opacity === (activeLayer.opacity ?? 1)) return;
+
+  saveHistory();
+  activeLayer.opacity = opacity;
+  layerOpacityValue.textContent = `${Math.round(opacity * 100)}%`;
+
+  renderAllLayers();
+  updateStatus();
 }
 
 function createExportCanvas() {
@@ -648,7 +702,9 @@ function createExportCanvas() {
 
   layers.forEach((layer) => {
     if (!layer.visible) return;
+    exportCtx.globalAlpha = layer.opacity ?? 1;
     exportCtx.drawImage(layer.canvas, 0, 0);
+    exportCtx.globalAlpha = 1;
   });
 
   return exportCanvas;
@@ -683,32 +739,74 @@ function savePng() {
   }, "image/png");
 }
 
-function drawImportedImage(image) {
-  const activeLayer = getActiveLayer();
-  if (!activeLayer || !activeLayer.visible) return;
+function createImageLayerName() {
+  const existingNames = new Set(layers.map((layer) => layer.name));
+  if (!existingNames.has("画像")) return "画像";
 
-  clearActiveLayerWithoutRender(activeLayer);
+  let number = 1;
+  while (existingNames.has(`画像${number}`)) {
+    number += 1;
+  }
+
+  return `画像${number}`;
+}
+
+function drawImportedImage(image, targetLayer, options = {}) {
+  if (!targetLayer || !targetLayer.visible) return;
+
+  if (options.clearBeforeDraw) {
+    clearActiveLayerWithoutRender(targetLayer);
+  }
 
   const scale = Math.min(
-    activeLayer.canvas.width / image.naturalWidth,
-    activeLayer.canvas.height / image.naturalHeight,
+    targetLayer.canvas.width / image.naturalWidth,
+    targetLayer.canvas.height / image.naturalHeight,
     1
   );
 
   const drawWidth = image.naturalWidth * scale;
   const drawHeight = image.naturalHeight * scale;
-  const drawX = (activeLayer.canvas.width - drawWidth) / 2;
-  const drawY = (activeLayer.canvas.height - drawHeight) / 2;
+  const drawX = (targetLayer.canvas.width - drawWidth) / 2;
+  const drawY = (targetLayer.canvas.height - drawHeight) / 2;
 
-  activeLayer.ctx.save();
-  activeLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
-  activeLayer.ctx.globalCompositeOperation = "source-over";
-  activeLayer.ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-  activeLayer.ctx.restore();
+  targetLayer.ctx.save();
+  targetLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  targetLayer.ctx.globalCompositeOperation = "source-over";
+  targetLayer.ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+  targetLayer.ctx.restore();
 
-  resetLayerDrawingSettings(activeLayer.ctx);
+  resetLayerDrawingSettings(targetLayer.ctx);
   setHintVisible(false);
   renderAllLayers();
+}
+
+function importImage(image) {
+  const shouldCreateLayer = imageImportMode.value === "new-layer";
+
+  if (shouldCreateLayer) {
+    if (layers.length >= maxLayers) {
+      alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
+      return;
+    }
+
+    const imageLayer = createLayer(createImageLayerName());
+    if (!imageLayer) return;
+
+    layers.push(imageLayer);
+    activeLayerId = imageLayer.id;
+    drawImportedImage(image, imageLayer, { clearBeforeDraw: false });
+    updateLayerUI();
+    return;
+  }
+
+  const activeLayer = getActiveLayer();
+
+  if (!activeLayer || !activeLayer.visible) {
+    alert("表示中のレイヤーを選択してから画像を読み込んでください。");
+    return;
+  }
+
+  drawImportedImage(image, activeLayer, { clearBeforeDraw: true });
 }
 
 function loadImageFile(event) {
@@ -721,22 +819,20 @@ function loadImageFile(event) {
     return;
   }
 
-  const activeLayer = getActiveLayer();
-
-  if (!activeLayer || !activeLayer.visible) {
-    alert("表示中のレイヤーを選択してから画像を読み込んでください。");
-    imageInput.value = "";
-    return;
-  }
-
   const reader = new FileReader();
 
   reader.onload = () => {
     const image = new Image();
 
     image.onload = () => {
+      if (imageImportMode.value === "new-layer" && layers.length >= maxLayers) {
+        alert(`レイヤーは最大${maxLayers}枚までです。現在レイヤーへ読み込むか、不要なレイヤーを削除してください。`);
+        imageInput.value = "";
+        return;
+      }
+
       saveHistory();
-      drawImportedImage(image);
+      importImage(image);
       imageInput.value = "";
     };
 
@@ -799,7 +895,7 @@ backgroundModeSelect.addEventListener("change", () => {
   setBackgroundMode(backgroundModeSelect.value);
 });
 
-backgroundColorInput.addEventListener("input", () => {
+backgroundColorInput.addEventListener("change", () => {
   setBackgroundColor(backgroundColorInput.value);
 });
 
@@ -808,6 +904,7 @@ loadImageBtn.addEventListener("click", () => {
 });
 
 imageInput.addEventListener("change", loadImageFile);
+layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 
 layerSelect.addEventListener("change", () => {
   activeLayerId = layerSelect.value;
