@@ -32,6 +32,7 @@ function serializeProjectState() {
       name: layer.name,
       visible: layer.visible,
       opacity: layer.opacity ?? 1,
+      hasContent: layer.hasContent === true,
       imageData: layer.canvas.toDataURL("image/png")
     }))
   };
@@ -99,14 +100,19 @@ async function restoreProjectState(projectState) {
       layerCtx.restore();
       resetLayerDrawingSettings(layerCtx);
 
-      return {
+      const restoredLayer = {
         id: layerData.id || createLayerId(),
         name: layerData.name || `レイヤー${index + 1}`,
         visible: layerData.visible !== false,
         opacity: Math.min(1, Math.max(0.1, Number(layerData.opacity ?? 1))),
+        hasContent: false,
         canvas: layerCanvas,
         ctx: layerCtx
       };
+      restoredLayer.hasContent = typeof layerData.hasContent === "boolean"
+        ? layerData.hasContent
+        : detectLayerHasContent(restoredLayer);
+      return restoredLayer;
     }));
 
     layers = restoredLayers.filter(Boolean);

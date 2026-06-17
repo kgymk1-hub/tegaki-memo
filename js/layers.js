@@ -14,7 +14,8 @@ function createLayer(name) {
     canvas: layerCanvas,
     ctx: layerCtx,
     visible: true,
-    opacity: 1
+    opacity: 1,
+    hasContent: false
   };
 }
 
@@ -33,6 +34,7 @@ function clearActiveLayerWithoutRender(layer) {
   layer.ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
   layer.ctx.restore();
   resetLayerDrawingSettings(layer.ctx);
+  layer.hasContent = false;
 }
 
 function clearActiveLayer() {
@@ -99,6 +101,7 @@ function duplicateActiveLayer() {
 
   duplicatedLayer.visible = true;
   duplicatedLayer.opacity = activeLayer.opacity ?? 1;
+  duplicatedLayer.hasContent = activeLayer.hasContent === true;
   duplicatedLayer.ctx.save();
   duplicatedLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
   duplicatedLayer.ctx.globalCompositeOperation = "source-over";
@@ -219,6 +222,7 @@ function mergeActiveLayerDown() {
   lowerLayer.ctx.globalAlpha = 1;
   lowerLayer.ctx.restore();
   resetLayerDrawingSettings(lowerLayer.ctx);
+  lowerLayer.hasContent = lowerLayer.hasContent === true || activeLayer.hasContent === true;
 
   layers.splice(index, 1);
   activeLayerId = lowerLayer.id;

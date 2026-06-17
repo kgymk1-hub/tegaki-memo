@@ -4,6 +4,7 @@ function createLayersSnapshot() {
     name: layer.name,
     visible: layer.visible,
     opacity: layer.opacity ?? 1,
+    hasContent: layer.hasContent === true,
     canvas: createSnapshotFromCanvas(layer.canvas)
   }));
 }
@@ -57,14 +58,19 @@ function restoreHistoryItem(item) {
       layerCtx.restore();
       resetLayerDrawingSettings(layerCtx);
 
-      return {
+      const restoredLayer = {
         id: layerSnapshot.id,
         name: layerSnapshot.name,
         visible: layerSnapshot.visible,
         opacity: layerSnapshot.opacity ?? 1,
+        hasContent: false,
         canvas: layerCanvas,
         ctx: layerCtx
       };
+      restoredLayer.hasContent = typeof layerSnapshot.hasContent === "boolean"
+        ? layerSnapshot.hasContent
+        : detectLayerHasContent(restoredLayer);
+      return restoredLayer;
     })
     .filter(Boolean);
 
