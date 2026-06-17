@@ -139,6 +139,125 @@ async function restoreProjectState(projectState) {
   }
 }
 
+function padProjectFileDate(number) {
+  return String(number).padStart(2, "0");
+}
+
+function createProjectFileName() {
+  const now = new Date();
+  const date = [
+    now.getFullYear(),
+    padProjectFileDate(now.getMonth() + 1),
+    padProjectFileDate(now.getDate())
+  ].join("");
+  const time = [
+    padProjectFileDate(now.getHours()),
+    padProjectFileDate(now.getMinutes()),
+    padProjectFileDate(now.getSeconds())
+  ].join("");
+
+  return `tegaki-memo-${date}-${time}.tegaki`;
+}
+
+function validateProjectState(projectState) {
+  if (!projectState || typeof projectState !== "object") return false;
+  if (projectState.app !== "tegaki-memo") return false;
+  if (!projectState.version) return false;
+  if (!projectState.canvas || typeof projectState.canvas !== "object") return false;
+  if (!Array.isArray(projectState.layers)) return false;
+  if (projectState.layers.length === 0) return false;
+
+  return projectState.layers.every((layer) => (
+    layer
+    && typeof layer === "object"
+    && typeof layer.imageData === "string"
+    && layer.imageData.length > 0
+  ));
+}
+
+function downloadProjectFile() {
+  if (isPlacingImage && isPlacingImage()) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
+  try {
+    const projectState = serializeProjectState();
+    const json = JSON.stringify(projectState, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = createProjectFileName();
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    scheduleAutoSave();
+  } catch (error) {
+    console.error("プロジェクトファイルの保存に失敗しました。", error);
+    alert("プロジェクトファイルを保存できませんでした。");
+  }
+}
+
+function openProjectFilePicker() {
+  if (isPlacingImage && isPlacingImage()) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
+  projectFileInput.click();
+}
+
+function readProjectFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error("ファイルの読み込みに失敗しました。"));
+    reader.readAsText(file);
+  });
+}
+
+async function loadProjectFile(file) {
+  if (!file) return;
+
+  const text = await readProjectFileAsText(file);
+  const projectState = JSON.parse(text);
+
+  if (!validateProjectState(projectState)) {
+    throw new Error("プロジェクトファイルの形式が正しくありません。");
+  }
+
+  const shouldLoad = window.confirm("現在の作業内容を置き換えて、プロジェクトファイルを読み込みますか？");
+  if (!shouldLoad) return;
+
+  await restoreProjectState(projectState);
+  pendingImage = null;
+  resetDrawingState();
+  history = [];
+  updateImagePlacementControls();
+  updateLayerUI();
+  updateToolButtons();
+  updateUndoButton();
+  refreshHint();
+  autoSaveNow();
+  showAutoSaveStatus("プロジェクトファイルを読み込みました");
+}
+
+async function handleProjectFileSelected(event) {
+  const file = event.target.files?.[0];
+
+  try {
+    await loadProjectFile(file);
+  } catch (error) {
+    console.error("プロジェクトファイルの読み込みに失敗しました。", error);
+    alert("プロジェクトファイルを読み込めませんでした。");
+  } finally {
+    event.target.value = "";
+  }
+}
+
 function scheduleAutoSave() {
   if (isRestoringProject) return;
 
