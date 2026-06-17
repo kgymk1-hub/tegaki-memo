@@ -1,21 +1,21 @@
-const CACHE_NAME = "tegaki-memo-v18-selection-layer-fix";
+const CACHE_NAME = "tegaki-memo-v19-canvas-zoom-ui";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=18",
-  "./js/state.js?v=18",
-  "./js/utils.js?v=18",
-  "./js/history.js?v=18",
-  "./js/layers.js?v=18",
-  "./js/canvas-render.js?v=18",
-  "./js/drawing-tools.js?v=18",
-  "./js/image-placement.js?v=18",
-  "./js/selection-tools.js?v=18",
-  "./js/project-storage.js?v=18",
-  "./js/ui.js?v=18",
-  "./js/pwa.js?v=18",
-  "./js/app.js?v=18",
+  "./style.css?v=19",
+  "./js/state.js?v=19",
+  "./js/utils.js?v=19",
+  "./js/history.js?v=19",
+  "./js/layers.js?v=19",
+  "./js/canvas-render.js?v=19",
+  "./js/drawing-tools.js?v=19",
+  "./js/image-placement.js?v=19",
+  "./js/selection-tools.js?v=19",
+  "./js/project-storage.js?v=19",
+  "./js/ui.js?v=19",
+  "./js/pwa.js?v=19",
+  "./js/app.js?v=19",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([

@@ -142,29 +142,29 @@ tegaki-memo/
 `index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
 
 ```html
-<script src="js/state.js?v=18" defer></script>
-<script src="js/utils.js?v=18" defer></script>
-<script src="js/history.js?v=18" defer></script>
-<script src="js/layers.js?v=18" defer></script>
-<script src="js/canvas-render.js?v=18" defer></script>
-<script src="js/drawing-tools.js?v=18" defer></script>
-<script src="js/image-placement.js?v=18" defer></script>
-<script src="js/selection-tools.js?v=18" defer></script>
-<script src="js/project-storage.js?v=18" defer></script>
-<script src="js/ui.js?v=18" defer></script>
-<script src="js/pwa.js?v=18" defer></script>
-<script src="js/app.js?v=18" defer></script>
+<script src="js/state.js?v=19" defer></script>
+<script src="js/utils.js?v=19" defer></script>
+<script src="js/history.js?v=19" defer></script>
+<script src="js/layers.js?v=19" defer></script>
+<script src="js/canvas-render.js?v=19" defer></script>
+<script src="js/drawing-tools.js?v=19" defer></script>
+<script src="js/image-placement.js?v=19" defer></script>
+<script src="js/selection-tools.js?v=19" defer></script>
+<script src="js/project-storage.js?v=19" defer></script>
+<script src="js/ui.js?v=19" defer></script>
+<script src="js/pwa.js?v=19" defer></script>
+<script src="js/app.js?v=19" defer></script>
 ```
 
 ## PWA更新時の注意
 
 JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
 
-- `index.html` の読み込みバージョン（例: `?v=18`）
+- `index.html` の読み込みバージョン（例: `?v=19`）
 - `service-worker.js` の `CACHE_NAME`
 - `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
 
-特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/selection-tools.js?v=18` もキャッシュ対象です。
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/selection-tools.js?v=19` もキャッシュ対象です。
 
 
 ## PWAとしての使い方
@@ -321,8 +321,6 @@ canvas, drawing-app, memo, handwriting, javascript, html, css, pwa, github-pages
 - 選択範囲の拡大縮小 / 回転
 - ブラシ種類の追加
 - レイヤー数上限や履歴数上限の見直し
-- キャンバスサイズ変更
-- UI折りたたみ
 - PWAアイコンのPNGサイズ別追加
 
 ## ライセンス候補
@@ -334,3 +332,12 @@ canvas, drawing-app, memo, handwriting, javascript, html, css, pwa, github-pages
 - **GPLv3**: 派生物にも同じライセンスでの公開を求めたい場合の候補です。
 
 迷う場合は、シンプルで採用例が多い **MIT License** が候補になります。
+
+## 第6フェーズ（キャンバスサイズ / ピンチズーム / UI折りたたみ）
+
+- キャンバスの実サイズを100〜4000pxの範囲で変更できます。
+- サイズ変更時、既存内容は左上基準で保持されます。拡大時は右側・下側に余白が増え、縮小時は右側・下側のはみ出た部分が切り取られます。
+- キャンバスサイズは自動保存と `.tegaki` 保存に含まれ、復元・読込時も保存時のサイズを維持します。
+- 2本指ピンチで50%〜300%の表示倍率に変更できます。ピンチズームは表示倍率のみを変更し、実際のキャンバスサイズやPNG保存サイズは変更しません。
+- ズーム倍率は保存対象外です。起動時、前回作業復元時、`.tegaki` 読込時は100%表示から開始します。
+- 保存 / 読込、画像操作、選択操作、レイヤー操作、設定を折りたたみUIにし、スマホ縦画面でも描画領域を確保しやすくしました。

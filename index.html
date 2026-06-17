@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=18" />
-  <script src="js/state.js?v=18" defer></script>
-  <script src="js/utils.js?v=18" defer></script>
-  <script src="js/history.js?v=18" defer></script>
-  <script src="js/layers.js?v=18" defer></script>
-  <script src="js/canvas-render.js?v=18" defer></script>
-  <script src="js/drawing-tools.js?v=18" defer></script>
-  <script src="js/image-placement.js?v=18" defer></script>
-  <script src="js/selection-tools.js?v=18" defer></script>
-  <script src="js/project-storage.js?v=18" defer></script>
-  <script src="js/ui.js?v=18" defer></script>
-  <script src="js/pwa.js?v=18" defer></script>
-  <script src="js/app.js?v=18" defer></script>
+  <link rel="stylesheet" href="style.css?v=19" />
+  <script src="js/state.js?v=19" defer></script>
+  <script src="js/utils.js?v=19" defer></script>
+  <script src="js/history.js?v=19" defer></script>
+  <script src="js/layers.js?v=19" defer></script>
+  <script src="js/canvas-render.js?v=19" defer></script>
+  <script src="js/drawing-tools.js?v=19" defer></script>
+  <script src="js/image-placement.js?v=19" defer></script>
+  <script src="js/selection-tools.js?v=19" defer></script>
+  <script src="js/project-storage.js?v=19" defer></script>
+  <script src="js/ui.js?v=19" defer></script>
+  <script src="js/pwa.js?v=19" defer></script>
+  <script src="js/app.js?v=19" defer></script>
 </head>
 <body>
   <header>
@@ -42,11 +42,17 @@
         <button id="undoBtn" type="button" disabled>戻す</button>
         <button id="clearBtn" class="danger" type="button">選択レイヤー消去</button>
         <button id="saveBtn" class="primary" type="button">PNG保存</button>
-        <button id="saveProjectBtn" class="primary" type="button">作業保存</button>
-        <button id="loadProjectBtn" type="button">作業読込</button>
-        <input id="projectFileInput" type="file" accept=".tegaki,application/json" hidden />
-        <button id="clearAutoSaveBtn" type="button">自動保存削除</button>
       </div>
+
+      <details class="control-group">
+        <summary>保存 / 読込</summary>
+        <div class="tool-row" aria-label="保存と読込">
+          <button id="saveProjectBtn" class="primary" type="button">作業保存</button>
+          <button id="loadProjectBtn" type="button">作業読込</button>
+          <input id="projectFileInput" type="file" accept=".tegaki,application/json" hidden />
+          <button id="clearAutoSaveBtn" type="button">自動保存削除</button>
+        </div>
+      </details>
 
       <div class="tool-row" aria-label="色と太さ">
         <button class="colorBtn active" type="button" data-color="#111827">黒</button>
@@ -70,49 +76,83 @@
         </label>
       </div>
 
-      <div class="tool-row" aria-label="背景と画像">
-        <label>
-          背景
-          <select id="backgroundModeSelect">
-            <option value="white" selected>白</option>
-            <option value="color">色</option>
-            <option value="transparent">透明</option>
+      <details class="control-group" id="settingsPanel" open>
+        <summary>設定</summary>
+        <div class="tool-row" aria-label="背景とキャンバス設定">
+          <label>
+            背景
+            <select id="backgroundModeSelect">
+              <option value="white" selected>白</option>
+              <option value="color">色</option>
+              <option value="transparent">透明</option>
+            </select>
+          </label>
+
+          <label>
+            背景色
+            <input id="backgroundColorInput" type="color" value="#ffffff" />
+          </label>
+
+          <label for="canvasWidthInput">幅
+            <input id="canvasWidthInput" class="number-input" type="number" min="100" max="4000" step="10" />
+          </label>
+          <label for="canvasHeightInput">高さ
+            <input id="canvasHeightInput" class="number-input" type="number" min="100" max="4000" step="10" />
+          </label>
+          <select id="canvasSizePreset" aria-label="キャンバスサイズプリセット">
+            <option value="">サイズ選択</option>
+            <option value="square">正方形</option>
+            <option value="phonePortrait">スマホ縦</option>
+            <option value="phoneLandscape">スマホ横</option>
+            <option value="a4Portrait">A4縦比率</option>
+            <option value="a4Landscape">A4横比率</option>
           </select>
-        </label>
+          <button id="applyCanvasSizeBtn" type="button">サイズ変更</button>
+          <span class="zoom-display">表示倍率 <span id="zoomValue">100%</span></span>
+          <button id="resetZoomBtn" type="button">等倍</button>
+        </div>
+      </details>
 
-        <label>
-          背景色
-          <input id="backgroundColorInput" type="color" value="#ffffff" />
-        </label>
+      <details class="control-group" id="imagePanel">
+        <summary>画像操作</summary>
+        <div class="tool-row" aria-label="画像操作">
+          <label>
+            画像読込先
+            <select id="imageImportMode">
+              <option value="new-layer" selected>新規レイヤー</option>
+              <option value="current-layer">現在レイヤー</option>
+            </select>
+          </label>
 
-        <label>
-          画像読込先
-          <select id="imageImportMode">
-            <option value="new-layer" selected>新規レイヤー</option>
-            <option value="current-layer">現在レイヤー</option>
-          </select>
-        </label>
+          <button id="loadImageBtn" type="button">画像読込</button>
+          <button id="confirmImageBtn" class="primary" type="button" disabled>確定</button>
+          <button id="cancelImageBtn" type="button" disabled>取消</button>
 
-        <button id="loadImageBtn" type="button">画像読込</button>
-        <button id="confirmImageBtn" class="primary" type="button" disabled>確定</button>
-        <button id="cancelImageBtn" type="button" disabled>取消</button>
+          <label class="image-scale-control" for="imageScaleInput">
+            画像倍率
+            <input id="imageScaleInput" type="range" min="10" max="300" value="100" step="5" disabled />
+            <span id="imageScaleValue">100%</span>
+          </label>
 
-        <label class="image-scale-control" for="imageScaleInput">
-          画像倍率
-          <input id="imageScaleInput" type="range" min="10" max="300" value="100" step="5" disabled />
-          <span id="imageScaleValue">100%</span>
-        </label>
+          <button id="rotateImageLeftBtn" type="button" disabled>左90°</button>
+          <button id="rotateImageRightBtn" type="button" disabled>右90°</button>
+          <input id="imageInput" type="file" accept="image/*" hidden />
+        </div>
+      </details>
 
-        <button id="rotateImageLeftBtn" type="button" disabled>左90°</button>
-        <button id="rotateImageRightBtn" type="button" disabled>右90°</button>
-        <button id="copySelectionBtn" type="button" disabled>コピー</button>
-        <button id="cutSelectionBtn" type="button" disabled>切取</button>
-        <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
-        <button id="clearSelectionBtn" type="button" disabled>解除</button>
-        <input id="imageInput" type="file" accept="image/*" hidden />
-      </div>
+      <details class="control-group" id="selectionPanel">
+        <summary>選択操作</summary>
+        <div class="tool-row" aria-label="選択操作">
+          <button id="copySelectionBtn" type="button" disabled>コピー</button>
+          <button id="cutSelectionBtn" type="button" disabled>切取</button>
+          <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
+          <button id="clearSelectionBtn" type="button" disabled>解除</button>
+        </div>
+      </details>
 
-      <div class="tool-row" aria-label="レイヤー操作">
+      <details class="control-group" open>
+        <summary>レイヤー操作</summary>
+        <div class="tool-row" aria-label="レイヤー操作">
         <label>
           レイヤー
           <select id="layerSelect"></select>
@@ -132,7 +172,8 @@
           <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
           <span id="layerOpacityValue">100%</span>
         </label>
-      </div>
+        </div>
+      </details>
     </div>
   </header>
 
