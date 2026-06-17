@@ -1,16 +1,34 @@
-const CACHE_NAME = "tegaki-memo-v11-image-transform";
+const CACHE_NAME = "tegaki-memo-v13-js-split";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=11",
-  "./app.js?v=11",
   "./manifest.json",
+  "./style.css?v=13",
+  "./js/state.js?v=13",
+  "./js/utils.js?v=13",
+  "./js/history.js?v=13",
+  "./js/layers.js?v=13",
+  "./js/canvas-render.js?v=13",
+  "./js/drawing-tools.js?v=13",
+  "./js/image-placement.js?v=13",
+  "./js/ui.js?v=13",
+  "./js/pwa.js?v=13",
+  "./js/app.js?v=13",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([
   "/",
   "/index.html",
   "/style.css",
+  "/state.js",
+  "/utils.js",
+  "/history.js",
+  "/layers.js",
+  "/canvas-render.js",
+  "/drawing-tools.js",
+  "/image-placement.js",
+  "/ui.js",
+  "/pwa.js",
   "/app.js"
 ]);
 

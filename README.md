@@ -87,12 +87,48 @@ https://kgymk1-hub.github.io/tegaki-memo/
 tegaki-memo/
 ├─ index.html         # 画面構造、PWA manifest / theme-color 読み込み
 ├─ style.css          # レイアウト・見た目・スマホ向け調整
-├─ app.js             # 描画処理・Undo・背景・画像読込・レイヤー管理・PNG保存・service worker 登録
 ├─ manifest.json      # PWA設定
 ├─ service-worker.js  # キャッシュ制御
-└─ icons/
-   └─ icon.svg        # PWAアイコン
+├─ icons/
+│  └─ icon.svg        # PWAアイコン
+└─ js/
+   ├─ state.js             # DOM参照、共有状態、定数
+   ├─ utils.js             # ポインター座標、スナップショットなどの汎用処理
+   ├─ history.js           # Undo履歴の保存・復元
+   ├─ layers.js            # レイヤー作成・追加・削除・複製・結合・透明度
+   ├─ canvas-render.js     # canvas描画、合成、リサイズ、背景、PNG保存
+   ├─ drawing-tools.js     # ペン、マーカー、消しゴム、図形、文字
+   ├─ image-placement.js   # 画像読込後の配置調整、拡大縮小、90°回転、確定 / 取消
+   ├─ ui.js                # UI表示更新、ヒント、イベント登録
+   ├─ pwa.js               # Service Worker登録
+   └─ app.js               # 起動時の初期化順序
 ```
+
+`index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
+
+```html
+<script src="js/state.js?v=13" defer></script>
+<script src="js/utils.js?v=13" defer></script>
+<script src="js/history.js?v=13" defer></script>
+<script src="js/layers.js?v=13" defer></script>
+<script src="js/canvas-render.js?v=13" defer></script>
+<script src="js/drawing-tools.js?v=13" defer></script>
+<script src="js/image-placement.js?v=13" defer></script>
+<script src="js/ui.js?v=13" defer></script>
+<script src="js/pwa.js?v=13" defer></script>
+<script src="js/app.js?v=13" defer></script>
+```
+
+## PWA更新時の注意
+
+JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
+
+- `index.html` の読み込みバージョン（例: `?v=13`）
+- `service-worker.js` の `CACHE_NAME`
+- `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
+
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。
+
 
 ## PWAとしての使い方
 
@@ -104,7 +140,7 @@ tegaki-memo/
 
 ### 更新が反映されない場合
 
-GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより古い `app.js` / `style.css` / `index.html` が残る場合があります。更新が反映されない場合は、以下を試してください。
+GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより古い `js/` 配下のJavaScript / `style.css` / `index.html` が残る場合があります。更新が反映されない場合は、以下を試してください。
 
 1. ページを数回再読み込みする
 2. Chromeのサイトデータ / キャッシュを削除する
@@ -112,13 +148,13 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 4. `service-worker.js` の `CACHE_NAME` が更新されているか確認する
 5. 再度GitHub Pagesを開き、必要に応じてホーム画面に追加し直す
 
-開発者向けの注意: `app.js` / `style.css` / `index.html` を変更した場合は、PWA更新のために `service-worker.js` の `CACHE_NAME` も更新してください。キャッシュ対象のクエリ文字列（例: `app.js?v=9`）を使っている場合は、`index.html` と `service-worker.js` の両方で同じ版にそろえてください。
+開発者向けの注意: `js/` 配下のJavaScript / `style.css` / `index.html` を変更した場合は、PWA更新のために `index.html` の読み込みバージョン、`service-worker.js` の `CACHE_NAME`、`APP_SHELL` を同じ版にそろえて更新してください。
 
 ## 動作確認チェックリスト
 
 ### コード整形
 
-- [ ] `app.js` と `style.css` が読みやすい改行・インデントになっている
+- [ ] `js/` 配下のJavaScriptと `style.css` が読みやすい改行・インデントになっている
 - [ ] ブラウザのコンソールに構文エラーが出ない
 - [ ] ペン・マーカー・消しゴム・色・太さ変更が動作する
 - [ ] 非表示レイヤーには描画できず、画面上のヒント「非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。」で案内される
