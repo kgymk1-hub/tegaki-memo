@@ -88,6 +88,7 @@ const minShapeDistance = 4;
 const minSelectionSize = 4;
 const hiddenLayerDrawingMessage = "非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。";
 const noDrawableLayerMessage = "描画できるレイヤーがありません。";
+// renderScale は高DPI端末向けの内部解像度倍率。
 const renderScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
 let isDrawing = false;
@@ -99,6 +100,8 @@ let backgroundColor = "#ffffff";
 let lastPoint = null;
 let previousPoint = null;
 let shapeStartPoint = null;
+// canvas.width / canvas.height は実際の内部ピクセルサイズ。
+// canvasWidth / canvasHeight はCSS表示上の基準サイズ。
 let canvasWidth = 0;
 let canvasHeight = 0;
 let history = [];

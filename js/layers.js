@@ -57,14 +57,6 @@ function clearCanvas() {
   scheduleAutoSave();
 }
 
-function undo() {
-  const item = history.pop();
-  if (!item) return;
-
-  restoreHistoryItem(item);
-  updateUndoButton();
-}
-
 function addLayer() {
   if (layers.length >= maxLayers) return;
 

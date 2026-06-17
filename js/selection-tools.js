@@ -92,14 +92,6 @@ function clearSelection() {
   refreshHint();
 }
 
-function clearSelectionIfLayerChanged() {
-  if (selection && selection.layerId !== activeLayerId) clearSelection();
-}
-
-function clearSelectionIfMissingLayer() {
-  if (selection && !layers.some((layer) => layer.id === selection.layerId)) clearSelection();
-}
-
 function hasActiveSelectionOnVisibleLayer() {
   const activeLayer = getActiveLayer();
   return Boolean(selection && activeLayer && activeLayer.visible && selection.layerId === activeLayer.id && !pendingImage);

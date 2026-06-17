@@ -212,12 +212,7 @@ function savePng() {
 }
 
 function resizeProjectCanvas(newWidth, newHeight) {
-  if (isPlacingImage && isPlacingImage()) {
-    alert("画像を確定または取消してください。");
-    return;
-  }
-
-  if (pendingImage) {
+  if (isPlacingImage()) {
     alert("画像を確定または取消してください。");
     return;
   }

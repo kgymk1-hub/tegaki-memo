@@ -85,3 +85,11 @@ function restoreHistoryItem(item) {
 function updateUndoButton() {
   undoBtn.disabled = history.length === 0;
 }
+
+function undo() {
+  const item = history.pop();
+  if (!item) return;
+
+  restoreHistoryItem(item);
+  updateUndoButton();
+}
