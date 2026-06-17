@@ -26,6 +26,12 @@ function isPlacingImage() {
   return Boolean(pendingImage);
 }
 
+function updateImagePlacementBar() {
+  const placingImage = isPlacingImage();
+  if (imagePlacementBar) imagePlacementBar.hidden = !placingImage;
+  document.body.classList.toggle("image-placing", placingImage);
+}
+
 function shouldShowInitialHint() {
   if (isPlacingImage()) return true;
 
@@ -145,6 +151,7 @@ function updateLayerUI() {
     imageScaleInput.value = 100;
     imageScaleValue.textContent = "100%";
   }
+  updateImagePlacementBar();
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";

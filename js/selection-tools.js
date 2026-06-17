@@ -195,6 +195,7 @@ function pasteSelection() {
   };
 
   clearSelection();
+  closeAdvancedControls();
   setHintVisible(true);
   updateImagePlacementControls();
   renderAllLayers();

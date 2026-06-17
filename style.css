@@ -14,7 +14,9 @@ body {
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
   background: #e5e7eb;
   color: #111827;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -90,7 +92,7 @@ h1 {
   left: 8px;
   right: 8px;
   top: 72px;
-  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
   overflow-y: auto;
   z-index: 50;
   display: none;
@@ -217,7 +219,12 @@ input[type="range"] {
 main {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 4px;
+  overflow: hidden;
+  padding: 4px 4px calc(8px + env(safe-area-inset-bottom));
+}
+
+body.image-placing main {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 .canvas-wrap {
@@ -231,6 +238,7 @@ main {
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
   touch-action: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .canvas-wrap.transparent-bg {
@@ -255,6 +263,50 @@ canvas {
   max-width: none;
   max-height: none;
   touch-action: none;
+}
+
+.canvas-bottom-spacer {
+  height: calc(32px + env(safe-area-inset-bottom));
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+body.image-placing .canvas-bottom-spacer {
+  height: calc(88px + env(safe-area-inset-bottom));
+}
+
+.image-placement-bar {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.image-placement-bar[hidden] {
+  display: none;
+}
+
+.image-placement-bar .image-scale-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.image-placement-bar input[type="range"] {
+  width: min(42vw, 180px);
 }
 
 .hint {
@@ -288,7 +340,7 @@ canvas {
     left: 6px;
     right: 6px;
     top: 62px;
-    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
     padding: 8px;
   }
 
@@ -326,6 +378,17 @@ canvas {
   }
 
   main {
+    padding: 6px 6px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  body.image-placing main {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .image-placement-bar {
+    left: 6px;
+    right: 6px;
+    gap: 4px;
     padding: 6px;
   }
 }
