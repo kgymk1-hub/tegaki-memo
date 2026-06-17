@@ -144,7 +144,7 @@ tegaki-memo/
    └─ app.js
 ```
 
-`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。CSS / JSのキャッシュ更新用クエリは `v22` です。
+`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v23` などの番号は、PWAキャッシュ更新用の内部番号です。
 
 ## PWA更新が反映されない場合
 
@@ -156,11 +156,12 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 4. 再度公開URLを開く
 5. 必要に応じてPWAを再インストールする
 
-開発時にHTML / CSS / JavaScript / manifestを変更した場合は、`index.html` の読み込みクエリ、`service-worker.js` の `CACHE_NAME`、`APP_SHELL` を同じ版にそろえて更新してください。
+開発時にHTML / CSS / JavaScript / manifestを変更した場合は、`index.html` のCSS / JS読み込みクエリ、`service-worker.js` の `CACHE_NAME`、`APP_SHELL` を同じキャッシュ更新番号にそろえて更新してください。
 
 ## 今後の改善候補
 
 - IndexedDBによる大容量自動保存
+- 表示中レイヤーの空判定処理の軽量化（hasContentフラグ方式など）
 - 選択範囲の拡大縮小・回転
 - 自由選択
 - OSクリップボード連携

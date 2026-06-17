@@ -211,7 +211,7 @@ function startDrawing(event) {
       try {
         canvas.setPointerCapture(event.pointerId);
       } catch (_) {
-        // Pointer Captureが使えない環境でも選択自体は継続する。
+        // Pointer Capture非対応環境では無視する。
       }
     }
     return;
@@ -242,7 +242,7 @@ function startDrawing(event) {
   try {
     canvas.setPointerCapture(event.pointerId);
   } catch (_) {
-    // Pointer Captureが使えない環境でも描画自体は継続する。
+    // Pointer Capture非対応環境では無視する。
   }
 
   if (!isShapeTool()) {
@@ -299,7 +299,7 @@ function stopDrawing(event) {
     try {
       canvas.releasePointerCapture(event.pointerId);
     } catch (_) {
-      // Pointer Captureが使えない環境では何もしない。
+      // Pointer Capture非対応環境では無視する。
     }
     return;
   }
@@ -332,7 +332,7 @@ function stopDrawing(event) {
   try {
     canvas.releasePointerCapture(event.pointerId);
   } catch (_) {
-    // Pointer Captureが使えない環境では何もしない。
+    // Pointer Capture非対応環境では無視する。
   }
 
   renderAllLayers();

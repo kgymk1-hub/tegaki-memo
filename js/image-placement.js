@@ -99,8 +99,6 @@ function updateImagePlacementControls() {
   imageImportMode.disabled = placingImage;
   updateToolButtons();
   updateLayerUI();
-  updateSelectionControls();
-  refreshHint();
 }
 
 function calculateFittedImageRect(image) {
@@ -204,7 +202,7 @@ function startPendingImageDrag(event) {
   try {
     canvas.setPointerCapture(event.pointerId);
   } catch (_) {
-    // Pointer Captureが使えない環境でも画像移動自体は継続する。
+    // Pointer Capture非対応環境では無視する。
   }
 }
 
@@ -227,7 +225,7 @@ function stopPendingImageDrag(event) {
   try {
     canvas.releasePointerCapture(event.pointerId);
   } catch (_) {
-    // Pointer Captureが使えない環境では何もしない。
+    // Pointer Capture非対応環境では無視する。
   }
 
   renderAllLayers();
