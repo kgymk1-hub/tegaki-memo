@@ -95,6 +95,7 @@ function updateImagePlacementControls() {
     imageScaleInput.value = 100;
     imageScaleValue.textContent = "100%";
   }
+  updateImagePlacementBar();
   loadImageBtn.disabled = false;
   imageImportMode.disabled = placingImage;
   updateToolButtons();
@@ -173,6 +174,7 @@ function beginImagePlacement(image) {
   resetDrawingState();
   setHintVisible(true);
   updateImagePlacementControls();
+  closeAdvancedControls();
   renderAllLayers();
   return true;
 }

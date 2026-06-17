@@ -50,6 +50,7 @@ const imageScaleInput = document.getElementById("imageScaleInput");
 const imageScaleValue = document.getElementById("imageScaleValue");
 const rotateImageLeftBtn = document.getElementById("rotateImageLeftBtn");
 const rotateImageRightBtn = document.getElementById("rotateImageRightBtn");
+const imagePlacementBar = document.getElementById("imagePlacementBar");
 const copySelectionBtn = document.getElementById("copySelectionBtn");
 const cutSelectionBtn = document.getElementById("cutSelectionBtn");
 const pasteSelectionBtn = document.getElementById("pasteSelectionBtn");
