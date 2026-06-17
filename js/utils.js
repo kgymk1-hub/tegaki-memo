@@ -28,6 +28,12 @@ function clampViewZoom(zoom) {
   return Math.min(maxViewZoom, Math.max(minViewZoom, zoom));
 }
 
+function updateZoomDisplay() {
+  const percent = Math.round(viewZoom * 100);
+  if (zoomValue) zoomValue.textContent = `${percent}%`;
+  if (viewZoomInput) viewZoomInput.value = String(percent);
+}
+
 function applyViewZoom(options = {}) {
   const previousLeft = canvasWrap.scrollLeft;
   const previousTop = canvasWrap.scrollTop;
@@ -36,7 +42,7 @@ function applyViewZoom(options = {}) {
   viewZoom = clampViewZoom(viewZoom || 1);
   canvas.style.width = `${canvasWidth * viewZoom}px`;
   canvas.style.height = `${canvasHeight * viewZoom}px`;
-  if (zoomValue) zoomValue.textContent = `${Math.round(viewZoom * 100)}%`;
+  updateZoomDisplay();
 
   if (options.centerPoint && options.clientPoint) {
     const targetLeft = (options.centerPoint.x / renderScale) * viewZoom - (options.clientPoint.x - canvasWrap.getBoundingClientRect().left);
@@ -48,6 +54,35 @@ function applyViewZoom(options = {}) {
     canvasWrap.scrollLeft = previousLeft * ratio;
     canvasWrap.scrollTop = previousTop * ratio;
   }
+}
+
+function applyZoomInputValue() {
+  if (!viewZoomInput) return;
+
+  const rawValue = viewZoomInput.value.trim();
+  const numericValue = Number(rawValue);
+  if (!rawValue || !Number.isFinite(numericValue)) {
+    updateZoomDisplay();
+    return;
+  }
+
+  viewZoom = clampViewZoom(Math.round(numericValue) / 100);
+  applyViewZoom({ preserveScroll: true });
+  viewZoomInput.value = String(Math.round(viewZoom * 100));
+}
+
+function fitViewToCanvas() {
+  const availableWidth = Math.max(1, canvasWrap.clientWidth);
+  const availableHeight = Math.max(1, canvasWrap.clientHeight);
+  const fitZoom = Math.min(
+    availableWidth / Math.max(1, canvasWidth),
+    availableHeight / Math.max(1, canvasHeight)
+  ) * 0.96;
+
+  viewZoom = clampViewZoom(fitZoom);
+  applyViewZoom();
+  canvasWrap.scrollLeft = 0;
+  canvasWrap.scrollTop = 0;
 }
 
 function updateCanvasSizeInputs() {

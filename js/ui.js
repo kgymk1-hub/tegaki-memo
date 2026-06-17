@@ -360,6 +360,22 @@ function bindEventListeners() {
     resizeProjectCanvas(canvasWidthInput.value, canvasHeightInput.value);
   });
 
+  if (viewZoomInput) {
+    viewZoomInput.addEventListener("change", applyZoomInputValue);
+    viewZoomInput.addEventListener("blur", applyZoomInputValue);
+    viewZoomInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        applyZoomInputValue();
+        viewZoomInput.blur();
+      }
+    });
+  }
+
+  if (fitViewBtn) {
+    fitViewBtn.addEventListener("click", fitViewToCanvas);
+  }
+
   resetZoomBtn.addEventListener("click", () => {
     viewZoom = 1;
     applyViewZoom({ preserveScroll: true });
