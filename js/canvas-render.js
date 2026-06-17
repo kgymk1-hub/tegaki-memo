@@ -24,6 +24,18 @@ function clearDisplayCanvas() {
   ctx.restore();
   resetDisplaySettings();
 }
+let renderAllLayersRequested = false;
+
+function requestRenderAllLayers() {
+  if (renderAllLayersRequested) return;
+
+  renderAllLayersRequested = true;
+  requestAnimationFrame(() => {
+    renderAllLayersRequested = false;
+    renderAllLayers();
+  });
+}
+
 function renderAllLayers() {
   clearDisplayCanvas();
 

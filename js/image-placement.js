@@ -67,7 +67,7 @@ function setPendingImageScale(scalePercent) {
   pendingImage.scale = Math.min(3, Math.max(0.1, Number(scalePercent) / 100));
   updatePendingImageBounds({ keepCenter: true });
   updateImagePlacementControls();
-  renderAllLayers();
+  requestRenderAllLayers();
 }
 
 function rotatePendingImage(deltaDegrees) {
@@ -215,7 +215,7 @@ function movePendingImage(event) {
   const point = getPointerCanvasPoint(event);
   pendingImage.x = point.x - pendingImage.dragOffsetX;
   pendingImage.y = point.y - pendingImage.dragOffsetY;
-  renderAllLayers();
+  requestRenderAllLayers();
 }
 
 function stopPendingImageDrag(event) {

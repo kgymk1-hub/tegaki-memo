@@ -279,7 +279,7 @@ function draw(event) {
     drawSmoothLine(getPointerPoint(coalescedEvent));
   }
 
-  renderAllLayers();
+  requestRenderAllLayers();
 }
 
 function getPointDistance(startPoint, endPoint) {
