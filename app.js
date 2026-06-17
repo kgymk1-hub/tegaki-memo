@@ -1287,10 +1287,10 @@ function recenterPendingImage() {
   pendingImage.baseWidth = placement.width;
   pendingImage.baseHeight = placement.height;
   pendingImage.scale = 1;
-  pendingImage.x = placement.x;
-  pendingImage.y = placement.y;
   pendingImage.rotation = pendingImage.rotation % 360;
   updatePendingImageBounds({ keepCenter: false });
+  pendingImage.x = (canvas.width - pendingImage.width) / 2;
+  pendingImage.y = (canvas.height - pendingImage.height) / 2;
   pendingImage.isDragging = false;
   updateImagePlacementControls();
 }
