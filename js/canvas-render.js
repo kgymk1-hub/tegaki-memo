@@ -114,14 +114,14 @@ function resizeCanvasIfNeeded() {
   renderAllLayers();
 }
 function updateBackgroundView() {
-  canvasWrap.classList.toggle("transparent-bg", backgroundMode === "transparent");
+  canvas.classList.toggle("transparent-bg", backgroundMode === "transparent");
 
   if (backgroundMode === "white") {
-    canvasWrap.style.backgroundColor = "#ffffff";
+    canvas.style.backgroundColor = "#ffffff";
   } else if (backgroundMode === "color") {
-    canvasWrap.style.backgroundColor = backgroundColor;
+    canvas.style.backgroundColor = backgroundColor;
   } else {
-    canvasWrap.style.backgroundColor = "#ffffff";
+    canvas.style.backgroundColor = "#ffffff";
   }
 }
 
