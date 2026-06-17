@@ -280,11 +280,13 @@ function stopDrawing(event) {
 
   const targetCtx = getDrawingContext();
   const endPoint = getPointerPoint(event);
+  let didChangeCanvas = false;
 
   if (targetCtx && isShapeTool() && shapeStartPoint) {
     if (getPointDistance(shapeStartPoint, endPoint) >= minShapeDistance) {
       saveHistory();
       drawShape(targetCtx, shapeStartPoint, endPoint);
+      didChangeCanvas = true;
     }
   } else if (targetCtx && lastPoint && previousPoint) {
     applyStrokeStyle(targetCtx);
@@ -293,6 +295,7 @@ function stopDrawing(event) {
     targetCtx.lineTo(lastPoint.x, lastPoint.y);
     targetCtx.stroke();
     resetAfterDrawing(targetCtx);
+    didChangeCanvas = true;
   }
 
   resetDrawingState();
@@ -304,7 +307,10 @@ function stopDrawing(event) {
   }
 
   renderAllLayers();
-  scheduleAutoSave();
+
+  if (didChangeCanvas) {
+    scheduleAutoSave();
+  }
 }
 function setTool(tool) {
   if (isPlacingImage()) return;
