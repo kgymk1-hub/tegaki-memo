@@ -1,21 +1,21 @@
-const CACHE_NAME = "tegaki-memo-v19-canvas-zoom-ui";
+const CACHE_NAME = "tegaki-memo-v20-pinch-shape-history";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=19",
-  "./js/state.js?v=19",
-  "./js/utils.js?v=19",
-  "./js/history.js?v=19",
-  "./js/layers.js?v=19",
-  "./js/canvas-render.js?v=19",
-  "./js/drawing-tools.js?v=19",
-  "./js/image-placement.js?v=19",
-  "./js/selection-tools.js?v=19",
-  "./js/project-storage.js?v=19",
-  "./js/ui.js?v=19",
-  "./js/pwa.js?v=19",
-  "./js/app.js?v=19",
+  "./style.css?v=20",
+  "./js/state.js?v=20",
+  "./js/utils.js?v=20",
+  "./js/history.js?v=20",
+  "./js/layers.js?v=20",
+  "./js/canvas-render.js?v=20",
+  "./js/drawing-tools.js?v=20",
+  "./js/image-placement.js?v=20",
+  "./js/selection-tools.js?v=20",
+  "./js/project-storage.js?v=20",
+  "./js/ui.js?v=20",
+  "./js/pwa.js?v=20",
+  "./js/app.js?v=20",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([

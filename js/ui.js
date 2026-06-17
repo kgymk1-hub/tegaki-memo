@@ -220,7 +220,7 @@ function handlePinchPointerDown(event) {
     x: ((center.x - rect.left) * canvas.width) / Math.max(1, rect.width),
     y: ((center.y - rect.top) * canvas.height) / Math.max(1, rect.height)
   };
-  if (isDrawing && history.length > 0) {
+  if (isDrawing && !isShapeTool() && history.length > 0) {
     const lastHistoryItem = history.pop();
     restoreHistoryItem(lastHistoryItem);
     updateUndoButton();
