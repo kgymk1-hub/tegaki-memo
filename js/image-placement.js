@@ -274,6 +274,7 @@ function confirmPendingImage() {
   setHintVisible(false);
   updateImagePlacementControls();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function cancelPendingImage() {

@@ -171,6 +171,7 @@ function setColor(color) {
   });
 
   updateToolButtons();
+  scheduleAutoSave();
 }
 
 function bindEventListeners() {
@@ -195,14 +196,17 @@ function bindEventListeners() {
   sizeSelect.addEventListener("change", () => {
     currentSize = Number(sizeSelect.value);
     updateStatus();
+    scheduleAutoSave();
   });
 
   backgroundModeSelect.addEventListener("change", () => {
     setBackgroundMode(backgroundModeSelect.value);
+    scheduleAutoSave();
   });
 
   backgroundColorInput.addEventListener("change", () => {
     setBackgroundColor(backgroundColorInput.value);
+    scheduleAutoSave();
   });
 
   loadImageBtn.addEventListener("click", () => {
@@ -226,6 +230,7 @@ function bindEventListeners() {
     activeLayerId = layerSelect.value;
     updateLayerUI();
     refreshHint();
+    scheduleAutoSave();
   });
 
   addLayerBtn.addEventListener("click", addLayer);
@@ -238,7 +243,14 @@ function bindEventListeners() {
   toggleLayerVisibilityBtn.addEventListener("click", toggleActiveLayerVisibility);
 
   clearBtn.addEventListener("click", clearCanvas);
-  undoBtn.addEventListener("click", undo);
+  undoBtn.addEventListener("click", () => {
+    undo();
+    scheduleAutoSave();
+  });
+  clearAutoSaveBtn.addEventListener("click", () => {
+    const ok = window.confirm("前回作業データを削除しますか？");
+    if (ok) clearAutoSaveData();
+  });
   saveBtn.addEventListener("click", savePng);
 
   canvas.addEventListener("pointerdown", startDrawing, { passive: false });

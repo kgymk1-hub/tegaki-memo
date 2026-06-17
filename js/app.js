@@ -1,4 +1,4 @@
-function initializeApp() {
+async function initializeApp() {
   resizeCanvasIfNeeded();
   initializeLayers();
   bindEventListeners();
@@ -6,6 +6,7 @@ function initializeApp() {
   updateToolButtons();
   updateUndoButton();
   updateBackgroundView();
+  await restoreAutoSaveOnStartup();
   registerServiceWorker();
 }
 
