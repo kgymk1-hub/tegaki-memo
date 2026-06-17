@@ -153,6 +153,7 @@ function cutSelection() {
   activeLayer.ctx.clearRect(selection.x, selection.y, selection.width, selection.height);
   activeLayer.ctx.restore();
   resetLayerDrawingSettings(activeLayer.ctx);
+  activeLayer.hasContent = detectLayerHasContent(activeLayer);
   renderAllLayers();
   updateSelectionControls();
   scheduleAutoSave();

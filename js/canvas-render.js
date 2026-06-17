@@ -107,6 +107,7 @@ function resizeLayerCanvases() {
 
     layer.ctx.restore();
     resetLayerDrawingSettings(layer.ctx);
+    layer.hasContent = snapshot ? layer.hasContent === true : false;
   });
 }
 
@@ -148,23 +149,21 @@ function setBackgroundColor(color, options = {}) {
   backgroundColor = color;
   updateBackgroundView();
 }
-function isLayerCanvasEmpty(layer) {
-  if (!layer?.canvas?.width || !layer?.canvas?.height) return true;
+function detectLayerHasContent(layer) {
+  if (!layer?.canvas?.width || !layer?.canvas?.height) return false;
 
   const imageData = layer.ctx.getImageData(0, 0, layer.canvas.width, layer.canvas.height);
   const pixels = imageData.data;
 
   for (let index = 3; index < pixels.length; index += 4) {
-    if (pixels[index] !== 0) return false;
+    if (pixels[index] !== 0) return true;
   }
 
-  return true;
+  return false;
 }
 
 function areVisibleLayersEmpty() {
-  return layers
-    .filter((layer) => layer.visible)
-    .every((layer) => isLayerCanvasEmpty(layer));
+  return !layers.some((layer) => layer.visible && layer.hasContent === true);
 }
 function createExportCanvas() {
   const exportCanvas = document.createElement("canvas");
@@ -265,6 +264,7 @@ function resizeProjectCanvas(newWidth, newHeight) {
     if (tempCanvas) layer.ctx.drawImage(tempCanvas, 0, 0);
     layer.ctx.restore();
     resetLayerDrawingSettings(layer.ctx);
+    layer.hasContent = detectLayerHasContent(layer);
   });
 
   canvas.width = width;

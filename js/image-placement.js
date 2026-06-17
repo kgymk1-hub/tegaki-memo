@@ -37,6 +37,7 @@ function drawImageToLayer(pending, targetLayer, options = {}) {
   targetLayer.ctx.restore();
 
   resetLayerDrawingSettings(targetLayer.ctx);
+  targetLayer.hasContent = true;
   return true;
 }
 

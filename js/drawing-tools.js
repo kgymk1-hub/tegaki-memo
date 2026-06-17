@@ -84,6 +84,8 @@ function drawDot(point) {
   targetCtx.beginPath();
   targetCtx.arc(point.x, point.y, currentSize / 2, 0, Math.PI * 2);
   targetCtx.fill();
+  const activeLayer = getActiveLayer();
+  if (activeLayer && currentTool !== "eraser") activeLayer.hasContent = true;
   resetAfterDrawing(targetCtx);
 }
 
@@ -109,6 +111,8 @@ function drawSmoothLine(point) {
   targetCtx.moveTo(previousPoint.x, previousPoint.y);
   targetCtx.quadraticCurveTo(lastPoint.x, lastPoint.y, midPoint.x, midPoint.y);
   targetCtx.stroke();
+  const activeLayer = getActiveLayer();
+  if (activeLayer && currentTool !== "eraser") activeLayer.hasContent = true;
   resetAfterDrawing(targetCtx);
 
   previousPoint = midPoint;
@@ -146,6 +150,8 @@ function drawShape(targetCtx, startPoint, endPoint, tool = currentTool) {
     }
   }
 
+  const activeLayer = getActiveLayer();
+  if (targetCtx !== ctx && activeLayer && tool !== "eraser") activeLayer.hasContent = true;
   resetAfterDrawing(targetCtx);
 }
 
@@ -191,6 +197,7 @@ function drawTextAt(point) {
   targetCtx.font = `${getTextFontSize()}px sans-serif`;
   targetCtx.textBaseline = "top";
   targetCtx.fillText(trimmedText, point.x, point.y);
+  activeLayer.hasContent = true;
   resetAfterDrawing(targetCtx);
   renderAllLayers();
   finishTextTool();
@@ -323,6 +330,10 @@ function stopDrawing(event) {
     targetCtx.moveTo(previousPoint.x, previousPoint.y);
     targetCtx.lineTo(lastPoint.x, lastPoint.y);
     targetCtx.stroke();
+    if (currentTool !== "eraser") {
+      const activeLayer = getActiveLayer();
+      if (activeLayer) activeLayer.hasContent = true;
+    }
     resetAfterDrawing(targetCtx);
     didChangeCanvas = true;
   }
