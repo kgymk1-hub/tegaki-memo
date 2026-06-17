@@ -57,6 +57,14 @@ https://kgymk1-hub.github.io/tegaki-memo/
   - 上下移動
   - 下へ結合
   - 透明度調整
+- 自動保存 / 前回作業復元
+  - 描画、背景、レイヤー操作、画像確定、Undoなどの変更後にブラウザ内へ自動保存
+  - 起動時に前回作業データがある場合は復元確認を表示
+  - ブラウザを閉じた後やページ再読み込み後も前回作業を復元可能
+  - 自動保存データ削除ボタンでブラウザ内の前回作業データのみ削除可能
+  - 自動保存は同じ端末・同じブラウザのサイトデータ内に保存されるため、端末やブラウザを変えると復元されません
+  - ブラウザのサイトデータ削除やキャッシュ削除により自動保存データも消える場合があります
+  - 独自形式ファイルとしての保存 / 読込は次フェーズで対応予定
 - PWA対応
   - `manifest.json`
   - `service-worker.js`
@@ -80,6 +88,8 @@ https://kgymk1-hub.github.io/tegaki-memo/
 13. レイヤーの「選択レイヤー透明度」スライダーで選択中レイヤーの見え方を調整できます。
 14. 「戻す」で直前の操作をUndoできます。
 15. 「PNG保存」で現在の表示内容を画像として保存できます。
+16. 作業内容は変更後に自動保存されます。次回起動時に「前回の作業データがあります。復元しますか？」と表示された場合、OKで復元、キャンセルで新規状態として開始できます。
+17. 「自動保存削除」は、現在のキャンバス内容を消さずにブラウザ内の前回作業データだけを削除します。
 
 ## ファイル構成
 
@@ -99,6 +109,7 @@ tegaki-memo/
    ├─ canvas-render.js     # canvas描画、合成、リサイズ、背景、PNG保存
    ├─ drawing-tools.js     # ペン、マーカー、消しゴム、図形、文字
    ├─ image-placement.js   # 画像読込後の配置調整、拡大縮小、90°回転、確定 / 取消
+   ├─ project-storage.js   # 作業状態のJSON化、自動保存、前回作業復元、削除
    ├─ ui.js                # UI表示更新、ヒント、イベント登録
    ├─ pwa.js               # Service Worker登録
    └─ app.js               # 起動時の初期化順序
@@ -107,27 +118,28 @@ tegaki-memo/
 `index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
 
 ```html
-<script src="js/state.js?v=13" defer></script>
-<script src="js/utils.js?v=13" defer></script>
-<script src="js/history.js?v=13" defer></script>
-<script src="js/layers.js?v=13" defer></script>
-<script src="js/canvas-render.js?v=13" defer></script>
-<script src="js/drawing-tools.js?v=13" defer></script>
-<script src="js/image-placement.js?v=13" defer></script>
-<script src="js/ui.js?v=13" defer></script>
-<script src="js/pwa.js?v=13" defer></script>
-<script src="js/app.js?v=13" defer></script>
+<script src="js/state.js?v=14" defer></script>
+<script src="js/utils.js?v=14" defer></script>
+<script src="js/history.js?v=14" defer></script>
+<script src="js/layers.js?v=14" defer></script>
+<script src="js/canvas-render.js?v=14" defer></script>
+<script src="js/drawing-tools.js?v=14" defer></script>
+<script src="js/image-placement.js?v=14" defer></script>
+<script src="js/project-storage.js?v=14" defer></script>
+<script src="js/ui.js?v=14" defer></script>
+<script src="js/pwa.js?v=14" defer></script>
+<script src="js/app.js?v=14" defer></script>
 ```
 
 ## PWA更新時の注意
 
 JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
 
-- `index.html` の読み込みバージョン（例: `?v=13`）
+- `index.html` の読み込みバージョン（例: `?v=14`）
 - `service-worker.js` の `CACHE_NAME`
 - `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
 
-特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/project-storage.js?v=14` もキャッシュ対象です。
 
 
 ## PWAとしての使い方
@@ -160,6 +172,22 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - [ ] 非表示レイヤーには描画できず、画面上のヒント「非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。」で案内される
 - [ ] 非表示レイヤー選択中にキャンバスを触ってもalertが繰り返し表示されず、レイヤー選択・表示切替・他ボタン操作を続けられる
 - [ ] 非表示レイヤー選択中は描画できず、不要なUndo履歴が増えない
+
+### 自動保存 / 前回作業復元
+
+- [ ] ペン、マーカー、消しゴムで描いた後に自動保存される
+- [ ] 直線 / 四角形 / 円・楕円 / 矢印 / 点線を描いた後に自動保存される
+- [ ] 文字入力後に自動保存され、文字ツールはペンへ戻る
+- [ ] 背景モード / 背景色変更後に自動保存される
+- [ ] レイヤー追加 / 削除 / 複製 / 名前変更 / 表示・非表示 / 順序変更 / 下へ結合 / 透明度変更 / 消去後に自動保存される
+- [ ] 画像確定後に自動保存される
+- [ ] Undo後に自動保存される
+- [ ] 画像配置中のドラッグ移動だけでは不要な自動保存が連発しない
+- [ ] ページ再読み込み後に前回作業データの復元確認が表示される
+- [ ] OKでレイヤー名、表示状態、透明度、背景、アクティブレイヤー、描画内容が復元される
+- [ ] キャンセルで新規状態として開始できる
+- [ ] 復元後にそのまま描画できる
+- [ ] localStorage容量超過などで保存に失敗してもアプリ操作は止まらず、ステータスとconsoleで確認できる
 
 ### PWA
 

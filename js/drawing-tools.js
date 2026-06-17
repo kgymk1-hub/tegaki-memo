@@ -194,6 +194,7 @@ function drawTextAt(point) {
   resetAfterDrawing(targetCtx);
   renderAllLayers();
   finishTextTool();
+  scheduleAutoSave();
 }
 
 function startDrawing(event) {
@@ -303,6 +304,7 @@ function stopDrawing(event) {
   }
 
   renderAllLayers();
+  scheduleAutoSave();
 }
 function setTool(tool) {
   if (isPlacingImage()) return;
@@ -310,4 +312,5 @@ function setTool(tool) {
   currentTool = tool;
   refreshHint();
   updateToolButtons();
+  scheduleAutoSave();
 }

@@ -54,6 +54,7 @@ function clearCanvas() {
   clearActiveLayer();
   updateHintText();
   setHintVisible(areVisibleLayersEmpty());
+  scheduleAutoSave();
 }
 
 function undo() {
@@ -78,6 +79,7 @@ function addLayer() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function duplicateActiveLayer() {
@@ -116,6 +118,7 @@ function duplicateActiveLayer() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function deleteActiveLayer() {
@@ -133,6 +136,7 @@ function deleteActiveLayer() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function renameActiveLayer() {
@@ -156,6 +160,7 @@ function renameActiveLayer() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function moveActiveLayerUp() {
@@ -168,6 +173,7 @@ function moveActiveLayerUp() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function moveActiveLayerDown() {
@@ -180,6 +186,7 @@ function moveActiveLayerDown() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function mergeActiveLayerDown() {
@@ -220,6 +227,7 @@ function mergeActiveLayerDown() {
 
   updateLayerUI();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function toggleActiveLayerVisibility() {
@@ -233,6 +241,7 @@ function toggleActiveLayerVisibility() {
   updateLayerUI();
   refreshHint();
   renderAllLayers();
+  scheduleAutoSave();
 }
 
 function updateActiveLayerOpacity() {
@@ -248,6 +257,7 @@ function updateActiveLayerOpacity() {
 
   renderAllLayers();
   updateStatus();
+  scheduleAutoSave();
 }
 function initializeLayers() {
   layers = [];

@@ -14,6 +14,7 @@ const eraserBtn = document.getElementById("eraserBtn");
 const undoBtn = document.getElementById("undoBtn");
 const clearBtn = document.getElementById("clearBtn");
 const saveBtn = document.getElementById("saveBtn");
+const clearAutoSaveBtn = document.getElementById("clearAutoSaveBtn");
 const customColor = document.getElementById("customColor");
 const sizeSelect = document.getElementById("sizeSelect");
 const status = document.getElementById("status");

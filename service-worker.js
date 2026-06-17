@@ -1,19 +1,20 @@
-const CACHE_NAME = "tegaki-memo-v13-js-split";
+const CACHE_NAME = "tegaki-memo-v14-autosave";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=13",
-  "./js/state.js?v=13",
-  "./js/utils.js?v=13",
-  "./js/history.js?v=13",
-  "./js/layers.js?v=13",
-  "./js/canvas-render.js?v=13",
-  "./js/drawing-tools.js?v=13",
-  "./js/image-placement.js?v=13",
-  "./js/ui.js?v=13",
-  "./js/pwa.js?v=13",
-  "./js/app.js?v=13",
+  "./style.css?v=14",
+  "./js/state.js?v=14",
+  "./js/utils.js?v=14",
+  "./js/history.js?v=14",
+  "./js/layers.js?v=14",
+  "./js/canvas-render.js?v=14",
+  "./js/drawing-tools.js?v=14",
+  "./js/image-placement.js?v=14",
+  "./js/project-storage.js?v=14",
+  "./js/ui.js?v=14",
+  "./js/pwa.js?v=14",
+  "./js/app.js?v=14",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([
@@ -27,6 +28,7 @@ const NETWORK_FIRST_PATHS = new Set([
   "/canvas-render.js",
   "/drawing-tools.js",
   "/image-placement.js",
+  "/project-storage.js",
   "/ui.js",
   "/pwa.js",
   "/app.js"
