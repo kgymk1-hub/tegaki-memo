@@ -112,7 +112,7 @@ https://kgymk1-hub.github.io/tegaki-memo/
 - ピンチズームは表示倍率のみで、保存画像サイズは変わりません。
 - キャンバスサイズを縮小すると、はみ出た部分は切れます。
 - PWA更新が反映されない場合は、キャッシュ削除やPWA再インストールが必要な場合があります。
-- PNGアイコンは今後手動で追加予定です。
+- PWA用アイコンとして `icons/icon-192.png` と `icons/icon-512.png` を使用します。既存の `icons/icon.svg` も補助的に残しています。
 - 外部ライブラリは使用していません。
 
 ## ファイル構成
@@ -126,6 +126,8 @@ tegaki-memo/
 ├─ LICENSE
 ├─ README.md
 ├─ icons/
+│  ├─ icon-192.png
+│  ├─ icon-512.png
 │  └─ icon.svg
 └─ js/
    ├─ state.js
@@ -142,7 +144,7 @@ tegaki-memo/
    └─ app.js
 ```
 
-`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。CSS / JSのキャッシュ更新用クエリは `v21` です。
+`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。CSS / JSのキャッシュ更新用クエリは `v22` です。
 
 ## PWA更新が反映されない場合
 
@@ -158,7 +160,6 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 
 ## 今後の改善候補
 
-- PNGアイコンの手動追加
 - IndexedDBによる大容量自動保存
 - 選択範囲の拡大縮小・回転
 - 自由選択

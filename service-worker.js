@@ -1,21 +1,23 @@
-const CACHE_NAME = "tegaki-memo-v21-release-polish-no-binary";
+const CACHE_NAME = "tegaki-memo-v22-png-icons";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=21",
-  "./js/state.js?v=21",
-  "./js/utils.js?v=21",
-  "./js/history.js?v=21",
-  "./js/layers.js?v=21",
-  "./js/canvas-render.js?v=21",
-  "./js/drawing-tools.js?v=21",
-  "./js/image-placement.js?v=21",
-  "./js/selection-tools.js?v=21",
-  "./js/project-storage.js?v=21",
-  "./js/ui.js?v=21",
-  "./js/pwa.js?v=21",
-  "./js/app.js?v=21",
+  "./style.css?v=22",
+  "./js/state.js?v=22",
+  "./js/utils.js?v=22",
+  "./js/history.js?v=22",
+  "./js/layers.js?v=22",
+  "./js/canvas-render.js?v=22",
+  "./js/drawing-tools.js?v=22",
+  "./js/image-placement.js?v=22",
+  "./js/selection-tools.js?v=22",
+  "./js/project-storage.js?v=22",
+  "./js/ui.js?v=22",
+  "./js/pwa.js?v=22",
+  "./js/app.js?v=22",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([
