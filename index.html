@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=27" />
-  <script src="js/state.js?v=27" defer></script>
-  <script src="js/utils.js?v=27" defer></script>
-  <script src="js/history.js?v=27" defer></script>
-  <script src="js/layers.js?v=27" defer></script>
-  <script src="js/canvas-render.js?v=27" defer></script>
-  <script src="js/drawing-tools.js?v=27" defer></script>
-  <script src="js/image-placement.js?v=27" defer></script>
-  <script src="js/selection-tools.js?v=27" defer></script>
-  <script src="js/project-storage.js?v=27" defer></script>
-  <script src="js/ui.js?v=27" defer></script>
-  <script src="js/pwa.js?v=27" defer></script>
-  <script src="js/app.js?v=27" defer></script>
+  <link rel="stylesheet" href="style.css?v=28" />
+  <script src="js/state.js?v=28" defer></script>
+  <script src="js/utils.js?v=28" defer></script>
+  <script src="js/history.js?v=28" defer></script>
+  <script src="js/layers.js?v=28" defer></script>
+  <script src="js/canvas-render.js?v=28" defer></script>
+  <script src="js/drawing-tools.js?v=28" defer></script>
+  <script src="js/image-placement.js?v=28" defer></script>
+  <script src="js/selection-tools.js?v=28" defer></script>
+  <script src="js/project-storage.js?v=28" defer></script>
+  <script src="js/ui.js?v=28" defer></script>
+  <script src="js/pwa.js?v=28" defer></script>
+  <script src="js/app.js?v=28" defer></script>
 </head>
 <body>
   <header>
@@ -152,7 +152,12 @@
             <option value="a4Landscape">A4横比率</option>
           </select>
           <button id="applyCanvasSizeBtn" type="button">サイズ変更</button>
-          <span class="zoom-display">表示倍率 <span id="zoomValue">100%</span></span>
+          <label class="zoom-input-label" for="viewZoomInput">表示倍率
+            <input id="viewZoomInput" class="number-input zoom-number-input" type="number" min="5" max="400" step="1" value="100" inputmode="numeric" />
+          </label>
+          <span class="zoom-unit">%</span>
+          <span class="zoom-display">現在 <span id="zoomValue">100%</span></span>
+          <button id="fitViewBtn" type="button">全体表示</button>
           <button id="resetZoomBtn" type="button">等倍</button>
         </div>
       </details>

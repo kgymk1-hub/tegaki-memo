@@ -263,7 +263,7 @@ body.image-placing main {
   overflow: auto;
   background: var(--color-canvas-area);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
+  border-radius: 0;
   box-shadow: var(--shadow-canvas-inset);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
@@ -289,6 +289,7 @@ canvas.transparent-bg {
   display: inline-block;
   width: fit-content;
   height: fit-content;
+  border-radius: 0;
 }
 
 canvas {
@@ -297,6 +298,7 @@ canvas {
   height: 100%;
   max-width: none;
   max-height: none;
+  border-radius: 0;
   touch-action: none;
 }
 
@@ -467,6 +469,25 @@ body.image-placing .canvas-bottom-spacer {
   color: var(--color-text-secondary);
   font-size: 13px;
   white-space: nowrap;
+}
+
+.zoom-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.zoom-number-input {
+  width: 72px;
+}
+
+.zoom-unit {
+  margin-left: -4px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 #zoomValue {

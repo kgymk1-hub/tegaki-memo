@@ -84,9 +84,11 @@ https://kgymk1-hub.github.io/tegaki-memo/
 - 「メニュー」内の設定で、幅・高さ入力またはプリセットからキャンバスサイズを変更できます。
 - サイズ変更時、既存内容は左上基準で保持されます。
 
-### ピンチズーム
+### 表示倍率
 
 - 2本指ピンチで表示倍率を変更できます。
+- 表示倍率は5%〜400%の範囲で、数値入力でも指定できます。
+- 「全体表示」により、大きなキャンバスも画面内に収めて確認できます。
 - 「等倍」で100%表示に戻せます。
 
 ### 自動保存と前回作業復元
@@ -153,11 +155,11 @@ tegaki-memo/
    └─ app.js
 ```
 
-`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v27` などの番号は、PWAキャッシュ更新用の内部番号です。
+`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v28` などの番号は、PWAキャッシュ更新用の内部番号です。
 
 ## PWA更新が反映されない場合
 
-GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより古いHTML / CSS / JavaScript / manifestが残る場合があります。更新が反映されない場合は、以下を試してください。
+GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより古いHTML / CSS / JavaScript / README / manifestが残る場合があります。更新が反映されない場合は、以下を試してください。
 
 1. ページを数回再読み込みする
 2. ブラウザのサイトデータ / キャッシュを削除する
@@ -165,7 +167,7 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 4. 再度公開URLを開く
 5. 必要に応じてPWAを再インストールする
 
-開発時にHTML / CSS / JavaScript / manifestを変更した場合は、`index.html` のCSS / JS読み込みクエリ、`service-worker.js` の `CACHE_NAME`、`APP_SHELL` を同じキャッシュ更新番号にそろえて更新してください。
+開発時にHTML / CSS / JavaScript / README / manifestを変更した場合は、`index.html` のCSS / JS読み込みクエリ、`service-worker.js` の `CACHE_NAME`、`APP_SHELL` を同じキャッシュ更新番号にそろえて更新してください。
 
 ## 今後の改善候補
 
