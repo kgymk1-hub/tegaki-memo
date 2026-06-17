@@ -174,7 +174,7 @@ main {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 12px;
@@ -201,6 +201,8 @@ canvas {
   display: block;
   width: 100%;
   height: 100%;
+  max-width: none;
+  max-height: none;
   touch-action: none;
 }
 
@@ -262,4 +264,51 @@ canvas {
   main {
     padding: 6px;
   }
+}
+
+.control-group {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.control-group summary {
+  min-height: 34px;
+  padding: 7px 10px;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.control-group .tool-row {
+  padding: 0 8px 8px;
+}
+
+.number-input {
+  width: 86px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.zoom-display {
+  flex: 0 0 auto;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  color: #374151;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#zoomValue {
+  min-width: 42px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }

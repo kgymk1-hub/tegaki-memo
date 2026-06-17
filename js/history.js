@@ -15,7 +15,11 @@ function saveHistory() {
     hintVisible: isHintVisible(),
     nextLayerNumber,
     backgroundMode,
-    backgroundColor
+    backgroundColor,
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    displayWidth: canvasWidth,
+    displayHeight: canvasHeight
   });
 
   if (history.length > maxHistory) history.shift();
@@ -23,6 +27,16 @@ function saveHistory() {
 }
 
 function restoreHistoryItem(item) {
+  if (item.canvasWidth && item.canvasHeight) {
+    canvas.width = item.canvasWidth;
+    canvas.height = item.canvasHeight;
+    canvasWidth = item.displayWidth || Math.round(item.canvasWidth / renderScale);
+    canvasHeight = item.displayHeight || Math.round(item.canvasHeight / renderScale);
+    resetDisplaySettings();
+    applyViewZoom({ preserveScroll: true });
+    updateCanvasSizeInputs();
+  }
+
   layers = item.layersSnapshot
     .map((layerSnapshot) => {
       const layerCanvas = document.createElement("canvas");

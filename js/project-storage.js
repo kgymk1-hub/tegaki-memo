@@ -72,8 +72,9 @@ async function restoreProjectState(projectState) {
       canvas.height = projectState.canvas.height;
       canvasWidth = projectState.canvas.displayWidth || Math.round(projectState.canvas.width / renderScale);
       canvasHeight = projectState.canvas.displayHeight || Math.round(projectState.canvas.height / renderScale);
-      canvas.style.width = `${canvasWidth}px`;
-      canvas.style.height = `${canvasHeight}px`;
+      viewZoom = 1;
+      applyViewZoom();
+      updateCanvasSizeInputs();
       resetDisplaySettings();
     }
 
@@ -132,6 +133,7 @@ async function restoreProjectState(projectState) {
 
     history = [];
     updateBackgroundView();
+    updateCanvasSizeInputs();
     renderAllLayers();
     updateLayerUI();
     updateToolButtons();

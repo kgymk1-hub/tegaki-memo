@@ -159,6 +159,7 @@ function updateLayerUI() {
 
   updateUndoButton();
   updateSelectionControls();
+  if (imagePanel && placingImage) imagePanel.open = true;
   refreshHint();
   updateStatus();
 }
@@ -178,6 +179,86 @@ function setColor(color) {
 
   updateToolButtons();
   scheduleAutoSave();
+}
+
+function getCanvasSizePresetValue(preset) {
+  const presets = {
+    square: [1000, 1000],
+    phonePortrait: [1080, 1920],
+    phoneLandscape: [1920, 1080],
+    a4Portrait: [1240, 1754],
+    a4Landscape: [1754, 1240]
+  };
+  return presets[preset] || null;
+}
+
+function getPinchDistance() {
+  const pointers = Array.from(activePointers.values());
+  if (pointers.length < 2) return 0;
+  return Math.hypot(pointers[0].clientX - pointers[1].clientX, pointers[0].clientY - pointers[1].clientY);
+}
+
+function getPinchClientCenter() {
+  const pointers = Array.from(activePointers.values());
+  return {
+    x: (pointers[0].clientX + pointers[1].clientX) / 2,
+    y: (pointers[0].clientY + pointers[1].clientY) / 2
+  };
+}
+
+function handlePinchPointerDown(event) {
+  activePointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
+  if (activePointers.size < 2) return false;
+
+  event.preventDefault();
+  isPinching = true;
+  pinchStartDistance = getPinchDistance();
+  pinchStartZoom = viewZoom;
+  const center = getPinchClientCenter();
+  const rect = canvas.getBoundingClientRect();
+  pinchCenterCanvasPoint = {
+    x: ((center.x - rect.left) * canvas.width) / Math.max(1, rect.width),
+    y: ((center.y - rect.top) * canvas.height) / Math.max(1, rect.height)
+  };
+  if (isDrawing && history.length > 0) {
+    const lastHistoryItem = history.pop();
+    restoreHistoryItem(lastHistoryItem);
+    updateUndoButton();
+  }
+  resetDrawingState();
+  if (typeof resetSelectionState === "function") resetSelectionState();
+  if (pendingImage) pendingImage.isDragging = false;
+  renderAllLayers();
+  return true;
+}
+
+function handlePinchPointerMove(event) {
+  if (!activePointers.has(event.pointerId)) return false;
+  activePointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
+  if (!isPinching || activePointers.size < 2) return false;
+
+  event.preventDefault();
+  const distance = getPinchDistance();
+  if (pinchStartDistance > 0) {
+    viewZoom = pinchStartZoom * (distance / pinchStartDistance);
+    applyViewZoom({ centerPoint: pinchCenterCanvasPoint, clientPoint: getPinchClientCenter() });
+  }
+  return true;
+}
+
+function handlePinchPointerEnd(event) {
+  activePointers.delete(event.pointerId);
+  if (!isPinching) return false;
+
+  event.preventDefault();
+  if (activePointers.size < 2) {
+    isPinching = false;
+    pinchStartDistance = 0;
+    pinchCenterCanvasPoint = null;
+    resetDrawingState();
+    updateSelectionControls();
+  }
+  return true;
 }
 
 function bindEventListeners() {
@@ -237,6 +318,22 @@ function bindEventListeners() {
   clearSelectionBtn.addEventListener("click", clearSelection);
   layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 
+  canvasSizePreset.addEventListener("change", () => {
+    const presetSize = getCanvasSizePresetValue(canvasSizePreset.value);
+    if (!presetSize) return;
+    canvasWidthInput.value = presetSize[0];
+    canvasHeightInput.value = presetSize[1];
+  });
+
+  applyCanvasSizeBtn.addEventListener("click", () => {
+    resizeProjectCanvas(canvasWidthInput.value, canvasHeightInput.value);
+  });
+
+  resetZoomBtn.addEventListener("click", () => {
+    viewZoom = 1;
+    applyViewZoom({ preserveScroll: true });
+  });
+
   layerSelect.addEventListener("change", () => {
     activeLayerId = layerSelect.value;
     if (selection) {
@@ -273,11 +370,26 @@ function bindEventListeners() {
   loadProjectBtn.addEventListener("click", openProjectFilePicker);
   projectFileInput.addEventListener("change", handleProjectFileSelected);
 
-  canvas.addEventListener("pointerdown", startDrawing, { passive: false });
-  canvas.addEventListener("pointermove", draw, { passive: false });
-  canvas.addEventListener("pointerup", stopDrawing, { passive: false });
-  canvas.addEventListener("pointercancel", stopDrawing, { passive: false });
-  canvas.addEventListener("pointerleave", stopDrawing, { passive: false });
+  canvas.addEventListener("pointerdown", (event) => {
+    if (handlePinchPointerDown(event)) return;
+    if (!isPinching) startDrawing(event);
+  }, { passive: false });
+  canvas.addEventListener("pointermove", (event) => {
+    if (handlePinchPointerMove(event)) return;
+    if (!isPinching) draw(event);
+  }, { passive: false });
+  canvas.addEventListener("pointerup", (event) => {
+    if (handlePinchPointerEnd(event)) return;
+    if (!isPinching) stopDrawing(event);
+  }, { passive: false });
+  canvas.addEventListener("pointercancel", (event) => {
+    if (handlePinchPointerEnd(event)) return;
+    if (!isPinching) stopDrawing(event);
+  }, { passive: false });
+  canvas.addEventListener("pointerleave", (event) => {
+    activePointers.delete(event.pointerId);
+    if (!isPinching) stopDrawing(event);
+  }, { passive: false });
 
-  window.addEventListener("resize", resizeCanvasIfNeeded);
+  window.addEventListener("resize", () => applyViewZoom({ preserveScroll: true }));
 }

@@ -345,6 +345,7 @@ function setTool(tool) {
   if (isPlacingImage()) return;
 
   currentTool = tool;
+  if (selectionPanel && tool === "select") selectionPanel.open = true;
   refreshHint();
   updateToolButtons();
   scheduleAutoSave();

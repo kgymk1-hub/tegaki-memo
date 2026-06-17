@@ -106,8 +106,8 @@ function resizeCanvasIfNeeded() {
   canvasHeight = height;
   canvas.width = Math.max(1, Math.floor(canvasWidth * renderScale));
   canvas.height = Math.max(1, Math.floor(canvasHeight * renderScale));
-  canvas.style.width = `${canvasWidth}px`;
-  canvas.style.height = `${canvasHeight}px`;
+  applyViewZoom({ preserveScroll: true });
+  updateCanvasSizeInputs();
 
   resizeLayerCanvases();
   recenterPendingImage();
@@ -209,4 +209,65 @@ function savePng() {
     link.remove();
     URL.revokeObjectURL(url);
   }, "image/png");
+}
+
+function resizeProjectCanvas(newWidth, newHeight) {
+  if (isPlacingImage && isPlacingImage()) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
+  if (pendingImage) {
+    alert("画像を確定または取消してください。");
+    return;
+  }
+
+  const width = Math.round(Number(newWidth));
+  const height = Math.round(Number(newHeight));
+
+  if (!Number.isFinite(width) || !Number.isFinite(height)) return;
+  if (width < 100 || height < 100 || width > 4000 || height > 4000) {
+    alert("キャンバスサイズは100〜4000pxの範囲で指定してください。");
+    return;
+  }
+
+  if (width === canvas.width && height === canvas.height) {
+    updateCanvasSizeInputs();
+    return;
+  }
+
+  const ok = window.confirm("キャンバスサイズを変更します。縮小すると、はみ出た部分は切り取られます。よろしいですか？");
+  if (!ok) return;
+
+  saveHistory();
+  resetDrawingState();
+  if (typeof resetSelectionState === "function") resetSelectionState();
+
+  layers.forEach((layer) => {
+    const tempCanvas = createSnapshotFromCanvas(layer.canvas);
+    layer.canvas.width = width;
+    layer.canvas.height = height;
+    layer.ctx = layer.canvas.getContext("2d");
+
+    layer.ctx.save();
+    layer.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    layer.ctx.globalCompositeOperation = "source-over";
+    layer.ctx.globalAlpha = 1;
+    layer.ctx.setLineDash([]);
+    layer.ctx.clearRect(0, 0, width, height);
+    if (tempCanvas) layer.ctx.drawImage(tempCanvas, 0, 0);
+    layer.ctx.restore();
+    resetLayerDrawingSettings(layer.ctx);
+  });
+
+  canvas.width = width;
+  canvas.height = height;
+  canvasWidth = Math.max(1, Math.round(width / renderScale));
+  canvasHeight = Math.max(1, Math.round(height / renderScale));
+  resetDisplaySettings();
+  applyViewZoom({ preserveScroll: true });
+  updateCanvasSizeInputs();
+  updateSelectionControls();
+  renderAllLayers();
+  scheduleAutoSave();
 }
