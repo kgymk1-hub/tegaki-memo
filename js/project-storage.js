@@ -2,6 +2,7 @@ const autoSaveStorageKey = "tegaki-memo:auto-save:v1";
 const autoSaveDelay = 1000;
 
 let autoSaveTimer = null;
+let autoSaveStatusTimer = null;
 let isRestoringProject = false;
 
 function serializeProjectState() {
@@ -185,8 +186,16 @@ function clearAutoSaveData() {
 }
 
 function showAutoSaveStatus(message) {
-  if (!message) return;
+  if (!status || !message) return;
+
   status.textContent = message;
+
+  window.clearTimeout(autoSaveStatusTimer);
+  autoSaveStatusTimer = window.setTimeout(() => {
+    if (!isRestoringProject && typeof updateStatus === "function") {
+      updateStatus();
+    }
+  }, 1500);
 }
 
 async function restoreAutoSaveOnStartup() {

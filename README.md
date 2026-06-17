@@ -118,28 +118,28 @@ tegaki-memo/
 `index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
 
 ```html
-<script src="js/state.js?v=14" defer></script>
-<script src="js/utils.js?v=14" defer></script>
-<script src="js/history.js?v=14" defer></script>
-<script src="js/layers.js?v=14" defer></script>
-<script src="js/canvas-render.js?v=14" defer></script>
-<script src="js/drawing-tools.js?v=14" defer></script>
-<script src="js/image-placement.js?v=14" defer></script>
-<script src="js/project-storage.js?v=14" defer></script>
-<script src="js/ui.js?v=14" defer></script>
-<script src="js/pwa.js?v=14" defer></script>
-<script src="js/app.js?v=14" defer></script>
+<script src="js/state.js?v=15" defer></script>
+<script src="js/utils.js?v=15" defer></script>
+<script src="js/history.js?v=15" defer></script>
+<script src="js/layers.js?v=15" defer></script>
+<script src="js/canvas-render.js?v=15" defer></script>
+<script src="js/drawing-tools.js?v=15" defer></script>
+<script src="js/image-placement.js?v=15" defer></script>
+<script src="js/project-storage.js?v=15" defer></script>
+<script src="js/ui.js?v=15" defer></script>
+<script src="js/pwa.js?v=15" defer></script>
+<script src="js/app.js?v=15" defer></script>
 ```
 
 ## PWA更新時の注意
 
 JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
 
-- `index.html` の読み込みバージョン（例: `?v=14`）
+- `index.html` の読み込みバージョン（例: `?v=15`）
 - `service-worker.js` の `CACHE_NAME`
 - `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
 
-特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/project-storage.js?v=14` もキャッシュ対象です。
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/project-storage.js?v=15` もキャッシュ対象です。
 
 
 ## PWAとしての使い方
@@ -188,6 +188,10 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - [ ] キャンセルで新規状態として開始できる
 - [ ] 復元後にそのまま描画できる
 - [ ] localStorage容量超過などで保存に失敗してもアプリ操作は止まらず、ステータスとconsoleで確認できる
+
+#### 自動保存の注意点
+
+現在の自動保存は `localStorage` を使用しています。レイヤー画像をData URLとして保存するため、キャンバスサイズやレイヤー数、画像内容によってはブラウザの容量制限により保存できない場合があります。将来的には、より大きなデータを扱いやすい `IndexedDB` 方式への移行を検討しています。
 
 ### PWA
 
