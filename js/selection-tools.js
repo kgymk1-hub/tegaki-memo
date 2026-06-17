@@ -66,7 +66,7 @@ function startSelection(point) {
 function updateSelection(point) {
   if (!isSelecting || !selectionStartPoint) return;
   selection = createSelectionFromPoints(selectionStartPoint, point);
-  renderAllLayers();
+  requestRenderAllLayers();
 }
 
 function finishSelection(point) {
