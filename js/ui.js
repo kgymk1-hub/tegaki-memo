@@ -261,7 +261,31 @@ function handlePinchPointerEnd(event) {
   return true;
 }
 
+function toggleAdvancedControls() {
+  const advancedControls = document.getElementById("advancedControls");
+  const menuToggleBtn = document.getElementById("menuToggleBtn");
+  if (!advancedControls) return;
+  const isOpen = advancedControls.classList.toggle("open");
+  if (menuToggleBtn) menuToggleBtn.setAttribute("aria-expanded", String(isOpen));
+}
+
+function closeAdvancedControls() {
+  const advancedControls = document.getElementById("advancedControls");
+  const menuToggleBtn = document.getElementById("menuToggleBtn");
+  if (!advancedControls) return;
+  advancedControls.classList.remove("open");
+  if (menuToggleBtn) menuToggleBtn.setAttribute("aria-expanded", "false");
+}
+
 function bindEventListeners() {
+  const menuToggleButton = document.getElementById("menuToggleBtn");
+  const menuCloseButton = document.getElementById("menuCloseBtn");
+  if (menuToggleButton) menuToggleButton.addEventListener("click", toggleAdvancedControls);
+  if (menuCloseButton) menuCloseButton.addEventListener("click", closeAdvancedControls);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAdvancedControls();
+  });
+
   penBtn.addEventListener("click", () => setTool("pen"));
   markerBtn.addEventListener("click", () => setTool("marker"));
   eraserBtn.addEventListener("click", () => setTool("eraser"));
