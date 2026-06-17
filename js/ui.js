@@ -252,6 +252,9 @@ function bindEventListeners() {
     if (ok) clearAutoSaveData();
   });
   saveBtn.addEventListener("click", savePng);
+  saveProjectBtn.addEventListener("click", downloadProjectFile);
+  loadProjectBtn.addEventListener("click", openProjectFilePicker);
+  projectFileInput.addEventListener("change", handleProjectFileSelected);
 
   canvas.addEventListener("pointerdown", startDrawing, { passive: false });
   canvas.addEventListener("pointermove", draw, { passive: false });

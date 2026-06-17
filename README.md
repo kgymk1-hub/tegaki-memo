@@ -64,7 +64,13 @@ https://kgymk1-hub.github.io/tegaki-memo/
   - 自動保存データ削除ボタンでブラウザ内の前回作業データのみ削除可能
   - 自動保存は同じ端末・同じブラウザのサイトデータ内に保存されるため、端末やブラウザを変えると復元されません
   - ブラウザのサイトデータ削除やキャッシュ削除により自動保存データも消える場合があります
-  - 独自形式ファイルとしての保存 / 読込は次フェーズで対応予定
+- 独自形式 `.tegaki` 保存 / 読込
+  - `.tegaki` は Tegaki Memo Project として保存する再編集用のプロジェクトファイルです
+  - 「作業保存」でレイヤー構造、レイヤー名、表示 / 非表示、透明度、背景設定、アクティブレイヤーなどを保持して保存します
+  - 「作業読込」で `.tegaki` またはJSONファイルを読み込み、現在の作業内容を置き換えて復元できます
+  - `.tegaki` の中身はJSON形式です
+  - レイヤー画像を含むため、キャンバス内容や画像、レイヤー数によってファイルサイズが大きくなる場合があります
+  - 自動保存はブラウザ内保存、`.tegaki` は端末へダウンロードするファイル保存です
 - PWA対応
   - `manifest.json`
   - `service-worker.js`
@@ -87,9 +93,11 @@ https://kgymk1-hub.github.io/tegaki-memo/
 12. 画像配置中はペン・マーカー・消しゴム・図形・文字などの描画ツールは使えません。PNG保存や再度の画像読込を行う前に、画像を確定または取消してください。画面サイズが変わった場合、配置中の画像は回転状態を維持し、倍率を100%に戻して新しいキャンバス内に収まるよう再中央配置されます。
 13. レイヤーの「選択レイヤー透明度」スライダーで選択中レイヤーの見え方を調整できます。
 14. 「戻す」で直前の操作をUndoできます。
-15. 「PNG保存」で現在の表示内容を画像として保存できます。
-16. 作業内容は変更後に自動保存されます。次回起動時に「前回の作業データがあります。復元しますか？」と表示された場合、OKで復元、キャンセルで新規状態として開始できます。
-17. 「自動保存削除」は、現在のキャンバス内容を消さずにブラウザ内の前回作業データだけを削除します。
+15. 「PNG保存」で現在の表示内容を完成画像として保存できます。
+16. 「作業保存」で、後から再編集できる `.tegaki` プロジェクトファイルを保存できます。PNGとは異なり、レイヤーや背景設定を保持します。
+17. 「作業読込」で `.tegaki` ファイルを読み込めます。読込前に確認が表示され、OKすると現在の作業内容はファイルの内容に置き換わります。
+18. 作業内容は変更後に自動保存されます。次回起動時に「前回の作業データがあります。復元しますか？」と表示された場合、OKで復元、キャンセルで新規状態として開始できます。
+19. 「自動保存削除」は、現在のキャンバス内容を消さずにブラウザ内の前回作業データだけを削除します。
 
 ## ファイル構成
 
@@ -118,28 +126,28 @@ tegaki-memo/
 `index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
 
 ```html
-<script src="js/state.js?v=15" defer></script>
-<script src="js/utils.js?v=15" defer></script>
-<script src="js/history.js?v=15" defer></script>
-<script src="js/layers.js?v=15" defer></script>
-<script src="js/canvas-render.js?v=15" defer></script>
-<script src="js/drawing-tools.js?v=15" defer></script>
-<script src="js/image-placement.js?v=15" defer></script>
-<script src="js/project-storage.js?v=15" defer></script>
-<script src="js/ui.js?v=15" defer></script>
-<script src="js/pwa.js?v=15" defer></script>
-<script src="js/app.js?v=15" defer></script>
+<script src="js/state.js?v=16" defer></script>
+<script src="js/utils.js?v=16" defer></script>
+<script src="js/history.js?v=16" defer></script>
+<script src="js/layers.js?v=16" defer></script>
+<script src="js/canvas-render.js?v=16" defer></script>
+<script src="js/drawing-tools.js?v=16" defer></script>
+<script src="js/image-placement.js?v=16" defer></script>
+<script src="js/project-storage.js?v=16" defer></script>
+<script src="js/ui.js?v=16" defer></script>
+<script src="js/pwa.js?v=16" defer></script>
+<script src="js/app.js?v=16" defer></script>
 ```
 
 ## PWA更新時の注意
 
 JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
 
-- `index.html` の読み込みバージョン（例: `?v=15`）
+- `index.html` の読み込みバージョン（例: `?v=16`）
 - `service-worker.js` の `CACHE_NAME`
 - `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
 
-特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/project-storage.js?v=15` もキャッシュ対象です。
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回更新した `js/project-storage.js?v=16` もキャッシュ対象です。
 
 
 ## PWAとしての使い方
@@ -189,9 +197,9 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - [ ] 復元後にそのまま描画できる
 - [ ] localStorage容量超過などで保存に失敗してもアプリ操作は止まらず、ステータスとconsoleで確認できる
 
-#### 自動保存の注意点
+#### 自動保存 / `.tegaki` の注意点
 
-現在の自動保存は `localStorage` を使用しています。レイヤー画像をData URLとして保存するため、キャンバスサイズやレイヤー数、画像内容によってはブラウザの容量制限により保存できない場合があります。将来的には、より大きなデータを扱いやすい `IndexedDB` 方式への移行を検討しています。
+現在の自動保存は `localStorage` を使用しています。レイヤー画像をData URLとして保存するため、キャンバスサイズやレイヤー数、画像内容によってはブラウザの容量制限により保存できない場合があります。`.tegaki` ファイルも同じくレイヤー画像をJSON内に含むため、画像やレイヤーを多く含む場合はファイルサイズが大きくなることがあります。将来的には、より大きなデータを扱いやすい `IndexedDB` 方式への移行を検討しています。
 
 ### PWA
 
@@ -229,7 +237,7 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - [ ] 結合先の下レイヤーが非表示の場合は結合できず、理由が表示される
 - [ ] 透明度付きレイヤーは見た目どおりに結合される
 
-### 画像読込 / PNG保存
+### 画像読込 / PNG保存 / `.tegaki` 保存読込
 
 - [ ] 画像を読み込むと中央にプレビュー表示され、まだレイヤーへ確定されていない
 - [ ] 画像配置中にドラッグで移動できる
@@ -242,9 +250,14 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - [ ] 確定後にUndoすると画像読込前へ戻る
 - [ ] 取消後はUndo履歴が増えない
 - [ ] 画像配置中はペン・図形・文字入力ができない
-- [ ] 画像配置中にPNG保存や再度の画像読込を行うと、確定 / 取消を促される
+- [ ] 画像配置中にPNG保存、作業保存、作業読込、再度の画像読込を行うと、確定 / 取消を促される
 - [ ] PNG保存に背景設定が反映される
 - [ ] PNG保存にレイヤー透明度が反映される
+- [ ] 作業保存で日時入りファイル名の `.tegaki` がダウンロードされる
+- [ ] `.tegaki` のJSONにレイヤー情報と背景設定が含まれる
+- [ ] 作業読込で置き換え確認後、レイヤー名、表示状態、透明度、背景、アクティブレイヤーが復元される
+- [ ] 作業読込後にUndo履歴が初期化され、同じファイルを再選択できる
+- [ ] 不正なJSONや必須項目が不足したファイルではエラー表示される
 
 ## 実装方針メモ
 
@@ -257,7 +270,8 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 - 画像読込は「新規レイヤー」を初期値にしつつ、「現在レイヤー」へ読み込む選択肢も残しています。
 - 画像読込後はすぐにレイヤーへ焼き付けず、表示用canvas上のプレビューとして配置調整します。ドラッグ移動、10%〜300%の倍率変更、左90° / 右90°の90度単位回転は確定前だけ行えます。確定時だけUndo履歴を1回積み、取消時やドラッグ移動・倍率変更・回転中は履歴を増やしません。
 - 任意角度回転、確定後画像の再編集、選択範囲機能は今後の予定です。
-- 画像配置中は通常描画・PNG保存・再度の画像読込を止め、確定または取消を促します。
+- 画像配置中は通常描画・PNG保存・作業保存・作業読込・再度の画像読込を止め、確定または取消を促します。
+- `.tegaki` 保存 / 読込は `serializeProjectState()` と `restoreProjectState()` を流用し、ファイル読込後はUndo履歴をリセットして自動保存データを読込後の状態へ更新します。
 
 ## GitHub リポジトリ設定案
 
@@ -278,7 +292,6 @@ canvas, drawing-app, memo, handwriting, javascript, html, css, pwa, github-pages
 - 確定後の画像レイヤーの再調整
 - 任意角度での画像回転
 - 選択範囲の移動・コピー・貼り付け
-- 独自形式での保存・再編集
 - ブラシ種類の追加
 - レイヤー数上限や履歴数上限の見直し
 - キャンバスサイズ変更

@@ -1,20 +1,20 @@
-const CACHE_NAME = "tegaki-memo-v15-autosave-polish";
+const CACHE_NAME = "tegaki-memo-v16-project-file";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=15",
-  "./js/state.js?v=15",
-  "./js/utils.js?v=15",
-  "./js/history.js?v=15",
-  "./js/layers.js?v=15",
-  "./js/canvas-render.js?v=15",
-  "./js/drawing-tools.js?v=15",
-  "./js/image-placement.js?v=15",
-  "./js/project-storage.js?v=15",
-  "./js/ui.js?v=15",
-  "./js/pwa.js?v=15",
-  "./js/app.js?v=15",
+  "./style.css?v=16",
+  "./js/state.js?v=16",
+  "./js/utils.js?v=16",
+  "./js/history.js?v=16",
+  "./js/layers.js?v=16",
+  "./js/canvas-render.js?v=16",
+  "./js/drawing-tools.js?v=16",
+  "./js/image-placement.js?v=16",
+  "./js/project-storage.js?v=16",
+  "./js/ui.js?v=16",
+  "./js/pwa.js?v=16",
+  "./js/app.js?v=16",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([
