@@ -38,6 +38,10 @@ const imageInput = document.getElementById("imageInput");
 const imageImportMode = document.getElementById("imageImportMode");
 const confirmImageBtn = document.getElementById("confirmImageBtn");
 const cancelImageBtn = document.getElementById("cancelImageBtn");
+const imageScaleInput = document.getElementById("imageScaleInput");
+const imageScaleValue = document.getElementById("imageScaleValue");
+const rotateImageLeftBtn = document.getElementById("rotateImageLeftBtn");
+const rotateImageRightBtn = document.getElementById("rotateImageRightBtn");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
@@ -145,7 +149,7 @@ function shouldShowInitialHint() {
 
 function updateHintText() {
   if (pendingImage) {
-    hint.textContent = "画像をドラッグで移動し、確定または取消してください";
+    hint.textContent = "画像をドラッグで移動し、倍率・90°回転を調整してから確定または取消してください";
     return;
   }
 
@@ -301,19 +305,29 @@ function renderAllLayers() {
 function renderPendingImagePreview() {
   if (!pendingImage) return;
 
+  const centerX = pendingImage.x + pendingImage.width / 2;
+  const centerY = pendingImage.y + pendingImage.height / 2;
+
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "source-over";
   ctx.setLineDash([]);
+  ctx.translate(centerX, centerY);
+  ctx.rotate((pendingImage.rotation * Math.PI) / 180);
   ctx.drawImage(
     pendingImage.image,
-    pendingImage.x,
-    pendingImage.y,
-    pendingImage.width,
-    pendingImage.height
+    -pendingImage.drawWidth / 2,
+    -pendingImage.drawHeight / 2,
+    pendingImage.drawWidth,
+    pendingImage.drawHeight
   );
+  ctx.restore();
 
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
   ctx.strokeStyle = "#2563eb";
   ctx.lineWidth = 2 * renderScale;
   ctx.setLineDash([6 * renderScale, 4 * renderScale]);
@@ -505,6 +519,18 @@ function updateLayerUI() {
   layerSelect.disabled = placingImage;
   confirmImageBtn.disabled = !placingImage;
   cancelImageBtn.disabled = !placingImage;
+  imageScaleInput.disabled = !placingImage;
+  rotateImageLeftBtn.disabled = !placingImage;
+  rotateImageRightBtn.disabled = !placingImage;
+
+  if (placingImage) {
+    const scalePercent = Math.round(pendingImage.scale * 100);
+    imageScaleInput.value = scalePercent;
+    imageScaleValue.textContent = `${scalePercent}%`;
+  } else {
+    imageScaleInput.value = 100;
+    imageScaleValue.textContent = "100%";
+  }
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -1152,22 +1178,84 @@ function drawImageToLayer(pending, targetLayer, options = {}) {
     clearActiveLayerWithoutRender(targetLayer);
   }
 
+  const centerX = pending.x + pending.width / 2;
+  const centerY = pending.y + pending.height / 2;
+
   targetLayer.ctx.save();
   targetLayer.ctx.setTransform(1, 0, 0, 1, 0, 0);
   targetLayer.ctx.globalCompositeOperation = "source-over";
   targetLayer.ctx.globalAlpha = 1;
   targetLayer.ctx.setLineDash([]);
-  targetLayer.ctx.drawImage(pending.image, pending.x, pending.y, pending.width, pending.height);
+  targetLayer.ctx.translate(centerX, centerY);
+  targetLayer.ctx.rotate((pending.rotation * Math.PI) / 180);
+  targetLayer.ctx.drawImage(
+    pending.image,
+    -pending.drawWidth / 2,
+    -pending.drawHeight / 2,
+    pending.drawWidth,
+    pending.drawHeight
+  );
   targetLayer.ctx.restore();
 
   resetLayerDrawingSettings(targetLayer.ctx);
   return true;
 }
 
+
+function updatePendingImageBounds({ keepCenter = true } = {}) {
+  if (!pendingImage) return;
+
+  const centerX = pendingImage.x + pendingImage.width / 2;
+  const centerY = pendingImage.y + pendingImage.height / 2;
+  const drawWidth = pendingImage.baseWidth * pendingImage.scale;
+  const drawHeight = pendingImage.baseHeight * pendingImage.scale;
+  const isRotatedSideways = pendingImage.rotation % 180 !== 0;
+
+  pendingImage.drawWidth = drawWidth;
+  pendingImage.drawHeight = drawHeight;
+  pendingImage.width = isRotatedSideways ? drawHeight : drawWidth;
+  pendingImage.height = isRotatedSideways ? drawWidth : drawHeight;
+
+  if (keepCenter) {
+    pendingImage.x = centerX - pendingImage.width / 2;
+    pendingImage.y = centerY - pendingImage.height / 2;
+  }
+}
+
+function setPendingImageScale(scalePercent) {
+  if (!pendingImage) return;
+
+  pendingImage.scale = Math.min(3, Math.max(0.1, Number(scalePercent) / 100));
+  updatePendingImageBounds({ keepCenter: true });
+  updateImagePlacementControls();
+  renderAllLayers();
+}
+
+function rotatePendingImage(deltaDegrees) {
+  if (!pendingImage) return;
+
+  pendingImage.rotation = (pendingImage.rotation + deltaDegrees + 360) % 360;
+  updatePendingImageBounds({ keepCenter: true });
+  updateImagePlacementControls();
+  renderAllLayers();
+}
+
 function updateImagePlacementControls() {
   const placingImage = isPlacingImage();
   confirmImageBtn.disabled = !placingImage;
   cancelImageBtn.disabled = !placingImage;
+  imageScaleInput.disabled = !placingImage;
+  rotateImageLeftBtn.disabled = !placingImage;
+  rotateImageRightBtn.disabled = !placingImage;
+
+  if (placingImage) {
+    const scalePercent = Math.round(pendingImage.scale * 100);
+    imageScaleInput.value = scalePercent;
+    imageScaleValue.textContent = `${scalePercent}%`;
+  } else {
+    imageScaleInput.value = 100;
+    imageScaleValue.textContent = "100%";
+  }
   loadImageBtn.disabled = false;
   imageImportMode.disabled = placingImage;
   updateToolButtons();
@@ -1196,11 +1284,15 @@ function recenterPendingImage() {
   if (!pendingImage) return;
 
   const placement = calculateFittedImageRect(pendingImage.image);
+  pendingImage.baseWidth = placement.width;
+  pendingImage.baseHeight = placement.height;
+  pendingImage.scale = 1;
   pendingImage.x = placement.x;
   pendingImage.y = placement.y;
-  pendingImage.width = placement.width;
-  pendingImage.height = placement.height;
+  pendingImage.rotation = pendingImage.rotation % 360;
+  updatePendingImageBounds({ keepCenter: false });
   pendingImage.isDragging = false;
+  updateImagePlacementControls();
 }
 
 function beginImagePlacement(image) {
@@ -1220,7 +1312,18 @@ function beginImagePlacement(image) {
   const placement = calculateFittedImageRect(image);
   pendingImage = {
     image,
-    ...placement,
+    x: placement.x,
+    y: placement.y,
+    // baseWidth/baseHeightは配置開始時にキャンバスへ収めた未回転の表示サイズ。
+    // drawWidth/drawHeightはscale適用後の未回転描画サイズ、width/heightは回転後の外接矩形。
+    baseWidth: placement.width,
+    baseHeight: placement.height,
+    drawWidth: placement.width,
+    drawHeight: placement.height,
+    width: placement.width,
+    height: placement.height,
+    scale: 1,
+    rotation: 0,
     targetMode,
     targetLayerId: targetMode === "current" ? activeLayer.id : null,
     layerName: targetMode === "new" ? createImageLayerName() : activeLayer.name,
@@ -1452,6 +1555,9 @@ loadImageBtn.addEventListener("click", () => {
 imageInput.addEventListener("change", loadImageFile);
 confirmImageBtn.addEventListener("click", confirmPendingImage);
 cancelImageBtn.addEventListener("click", cancelPendingImage);
+imageScaleInput.addEventListener("input", (event) => setPendingImageScale(event.target.value));
+rotateImageLeftBtn.addEventListener("click", () => rotatePendingImage(-90));
+rotateImageRightBtn.addEventListener("click", () => rotatePendingImage(90));
 layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 
 layerSelect.addEventListener("change", () => {

@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=10" />
-  <script src="app.js?v=10" defer></script>
+  <link rel="stylesheet" href="style.css?v=11" />
+  <script src="app.js?v=11" defer></script>
 </head>
 <body>
   <header>
@@ -80,6 +80,15 @@
         <button id="loadImageBtn" type="button">画像読込</button>
         <button id="confirmImageBtn" class="primary" type="button" disabled>確定</button>
         <button id="cancelImageBtn" type="button" disabled>取消</button>
+
+        <label class="image-scale-control" for="imageScaleInput">
+          画像倍率
+          <input id="imageScaleInput" type="range" min="10" max="300" value="100" step="5" disabled />
+          <span id="imageScaleValue">100%</span>
+        </label>
+
+        <button id="rotateImageLeftBtn" type="button" disabled>左90°</button>
+        <button id="rotateImageRightBtn" type="button" disabled>右90°</button>
         <input id="imageInput" type="file" accept="image/*" hidden />
       </div>
 

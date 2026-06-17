@@ -153,6 +153,11 @@ input[type="range"] {
   accent-color: #2563eb;
 }
 
+.image-scale-control input[type="range"] {
+  width: min(42vw, 180px);
+}
+
+.image-scale-control span,
 .opacity-control span {
   min-width: 38px;
   color: #4b5563;
