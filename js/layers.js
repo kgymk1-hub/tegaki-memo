@@ -130,6 +130,7 @@ function deleteActiveLayer() {
   saveHistory();
 
   layers.splice(index, 1);
+  clearSelectionIfMissingLayer();
 
   const nextActiveLayer = layers[index - 1] || layers[index] || layers[0];
   activeLayerId = nextActiveLayer ? nextActiveLayer.id : null;
@@ -237,6 +238,7 @@ function toggleActiveLayerVisibility() {
   saveHistory();
 
   activeLayer.visible = !activeLayer.visible;
+  if (!activeLayer.visible && selection?.layerId === activeLayer.id) clearSelection();
 
   updateLayerUI();
   refreshHint();

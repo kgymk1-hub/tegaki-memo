@@ -41,6 +41,7 @@ function renderAllLayers() {
   ctx.restore();
   resetDisplaySettings();
   renderPendingImagePreview();
+  renderSelectionOverlay();
 }
 
 function renderPendingImagePreview() {

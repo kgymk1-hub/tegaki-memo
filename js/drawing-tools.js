@@ -205,6 +205,18 @@ function startDrawing(event) {
     return;
   }
 
+  if (currentTool === "select") {
+    const point = getPointerCanvasPoint(event);
+    if (startSelection(point)) {
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (_) {
+        // Pointer Captureが使えない環境でも選択自体は継続する。
+      }
+    }
+    return;
+  }
+
   if (!canDrawOnActiveLayer({ showHint: true })) {
     resetDrawingState();
     return;
@@ -245,6 +257,12 @@ function draw(event) {
     return;
   }
 
+  if (isSelecting) {
+    event.preventDefault();
+    updateSelection(getPointerCanvasPoint(event));
+    return;
+  }
+
   if (!isDrawing) return;
   event.preventDefault();
 
@@ -272,6 +290,17 @@ function getPointDistance(startPoint, endPoint) {
 function stopDrawing(event) {
   if (pendingImage) {
     stopPendingImageDrag(event);
+    return;
+  }
+
+  if (isSelecting) {
+    event.preventDefault();
+    finishSelection(getPointerCanvasPoint(event));
+    try {
+      canvas.releasePointerCapture(event.pointerId);
+    } catch (_) {
+      // Pointer Captureが使えない環境では何もしない。
+    }
     return;
   }
 
