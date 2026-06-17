@@ -76,8 +76,10 @@ function addLayer() {
   layers.push(layer);
   activeLayerId = layer.id;
   nextLayerNumber += 1;
+  resetSelectionState();
 
   updateLayerUI();
+  updateSelectionControls();
   renderAllLayers();
   scheduleAutoSave();
 }
@@ -115,8 +117,10 @@ function duplicateActiveLayer() {
 
   layers.splice(index + 1, 0, duplicatedLayer);
   activeLayerId = duplicatedLayer.id;
+  resetSelectionState();
 
   updateLayerUI();
+  updateSelectionControls();
   renderAllLayers();
   scheduleAutoSave();
 }
@@ -130,12 +134,13 @@ function deleteActiveLayer() {
   saveHistory();
 
   layers.splice(index, 1);
-  clearSelectionIfMissingLayer();
 
   const nextActiveLayer = layers[index - 1] || layers[index] || layers[0];
   activeLayerId = nextActiveLayer ? nextActiveLayer.id : null;
+  resetSelectionState();
 
   updateLayerUI();
+  updateSelectionControls();
   renderAllLayers();
   scheduleAutoSave();
 }
@@ -225,8 +230,10 @@ function mergeActiveLayerDown() {
 
   layers.splice(index, 1);
   activeLayerId = lowerLayer.id;
+  resetSelectionState();
 
   updateLayerUI();
+  updateSelectionControls();
   renderAllLayers();
   scheduleAutoSave();
 }

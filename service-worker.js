@@ -1,21 +1,21 @@
-const CACHE_NAME = "tegaki-memo-v17-selection-tools";
+const CACHE_NAME = "tegaki-memo-v18-selection-layer-fix";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=17",
-  "./js/state.js?v=17",
-  "./js/utils.js?v=17",
-  "./js/history.js?v=17",
-  "./js/layers.js?v=17",
-  "./js/canvas-render.js?v=17",
-  "./js/drawing-tools.js?v=17",
-  "./js/image-placement.js?v=17",
-  "./js/selection-tools.js?v=17",
-  "./js/project-storage.js?v=17",
-  "./js/ui.js?v=17",
-  "./js/pwa.js?v=17",
-  "./js/app.js?v=17",
+  "./style.css?v=18",
+  "./js/state.js?v=18",
+  "./js/utils.js?v=18",
+  "./js/history.js?v=18",
+  "./js/layers.js?v=18",
+  "./js/canvas-render.js?v=18",
+  "./js/drawing-tools.js?v=18",
+  "./js/image-placement.js?v=18",
+  "./js/selection-tools.js?v=18",
+  "./js/project-storage.js?v=18",
+  "./js/ui.js?v=18",
+  "./js/pwa.js?v=18",
+  "./js/app.js?v=18",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([

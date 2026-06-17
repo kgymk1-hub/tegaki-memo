@@ -89,6 +89,8 @@ https://kgymk1-hub.github.io/tegaki-memo/
 
 ## 使い方
 
+- レイヤー追加・複製・削除・結合など、対象レイヤーが変わる操作を行うと、選択範囲は解除されます。
+
 1. GitHub Pages URL、またはローカルの `index.html` をブラウザで開きます。
 2. キャンバス上を指・タッチペン・マウスでなぞると描画できます。
 3. ツールバーでペン、マーカー、消しゴム、図形、文字、色、太さ、背景、レイヤーを切り替えます。
@@ -140,29 +142,29 @@ tegaki-memo/
 `index.html` では ES Modules を使わず、従来どおりグローバルスコープの JavaScript を `defer` 付きで次の順に読み込みます。
 
 ```html
-<script src="js/state.js?v=17" defer></script>
-<script src="js/utils.js?v=17" defer></script>
-<script src="js/history.js?v=17" defer></script>
-<script src="js/layers.js?v=17" defer></script>
-<script src="js/canvas-render.js?v=17" defer></script>
-<script src="js/drawing-tools.js?v=17" defer></script>
-<script src="js/image-placement.js?v=17" defer></script>
-<script src="js/selection-tools.js?v=17" defer></script>
-<script src="js/project-storage.js?v=17" defer></script>
-<script src="js/ui.js?v=17" defer></script>
-<script src="js/pwa.js?v=17" defer></script>
-<script src="js/app.js?v=17" defer></script>
+<script src="js/state.js?v=18" defer></script>
+<script src="js/utils.js?v=18" defer></script>
+<script src="js/history.js?v=18" defer></script>
+<script src="js/layers.js?v=18" defer></script>
+<script src="js/canvas-render.js?v=18" defer></script>
+<script src="js/drawing-tools.js?v=18" defer></script>
+<script src="js/image-placement.js?v=18" defer></script>
+<script src="js/selection-tools.js?v=18" defer></script>
+<script src="js/project-storage.js?v=18" defer></script>
+<script src="js/ui.js?v=18" defer></script>
+<script src="js/pwa.js?v=18" defer></script>
+<script src="js/app.js?v=18" defer></script>
 ```
 
 ## PWA更新時の注意
 
 JavaScript / CSSを追加・変更した場合は、古いファイルがService Workerキャッシュに残らないように、以下を同じ版へ更新してください。
 
-- `index.html` の読み込みバージョン（例: `?v=17`）
+- `index.html` の読み込みバージョン（例: `?v=18`）
 - `service-worker.js` の `CACHE_NAME`
 - `service-worker.js` の `APP_SHELL` に含めるファイル一覧とクエリ文字列
 
-特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/selection-tools.js?v=17` もキャッシュ対象です。
+特にJavaScriptファイルを追加した場合は、`index.html` の `<script>` と `APP_SHELL` の両方へ追加してください。今回追加した `js/selection-tools.js?v=18` もキャッシュ対象です。
 
 
 ## PWAとしての使い方

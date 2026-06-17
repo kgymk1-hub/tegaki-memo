@@ -79,10 +79,14 @@ function finishSelection(point) {
   renderAllLayers();
 }
 
-function clearSelection() {
+function resetSelectionState() {
   selection = null;
   isSelecting = false;
   selectionStartPoint = null;
+}
+
+function clearSelection() {
+  resetSelectionState();
   updateSelectionControls();
   renderAllLayers();
   refreshHint();
