@@ -99,17 +99,18 @@ function updateImagePlacementControls() {
   imageImportMode.disabled = placingImage;
   updateToolButtons();
   updateLayerUI();
+  updateSelectionControls();
   refreshHint();
 }
 
 function calculateFittedImageRect(image) {
   const scale = Math.min(
-    canvas.width / image.naturalWidth,
-    canvas.height / image.naturalHeight,
+    canvas.width / (image.naturalWidth || image.width),
+    canvas.height / (image.naturalHeight || image.height),
     1
   );
-  const width = image.naturalWidth * scale;
-  const height = image.naturalHeight * scale;
+  const width = (image.naturalWidth || image.width) * scale;
+  const height = (image.naturalHeight || image.height) * scale;
 
   return {
     x: (canvas.width - width) / 2,
@@ -249,7 +250,7 @@ function confirmPendingImage() {
     if (!targetLayer) return;
   } else {
     targetLayer = layers.find((layer) => layer.id === pending.targetLayerId) || null;
-    shouldClearBeforeDraw = true;
+    shouldClearBeforeDraw = pending.source !== "clipboard";
 
     if (!targetLayer) {
       alert("画像読込先のレイヤーが見つかりません。画像を取消してから再度読み込んでください。");
@@ -272,6 +273,7 @@ function confirmPendingImage() {
   drawImageToLayer(pending, targetLayer, { clearBeforeDraw: shouldClearBeforeDraw });
   pendingImage = null;
   setHintVisible(false);
+  updateSelectionControls();
   updateImagePlacementControls();
   renderAllLayers();
   scheduleAutoSave();
@@ -281,6 +283,7 @@ function cancelPendingImage() {
   if (!pendingImage) return;
 
   pendingImage = null;
+  updateSelectionControls();
   setHintVisible(shouldShowInitialHint());
   updateImagePlacementControls();
   renderAllLayers();

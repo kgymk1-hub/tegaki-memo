@@ -15,6 +15,10 @@ function getToolHintText(tool = currentTool) {
     return "文字を入れたい位置をタップしてください";
   }
 
+  if (tool === "select") {
+    return "選択範囲をドラッグして指定します。";
+  }
+
   return "指やタッチペンでここに描けます";
 }
 
@@ -65,7 +69,8 @@ function getToolLabel() {
     ellipse: "円",
     arrow: "矢印",
     dashedLine: "点線",
-    text: "文字"
+    text: "文字",
+    select: "選択"
   };
 
   return labels[currentTool] || "ペン";
@@ -153,6 +158,7 @@ function updateLayerUI() {
   }
 
   updateUndoButton();
+  updateSelectionControls();
   refreshHint();
   updateStatus();
 }
@@ -184,6 +190,7 @@ function bindEventListeners() {
   arrowBtn.addEventListener("click", () => setTool("arrow"));
   dashedLineBtn.addEventListener("click", () => setTool("dashedLine"));
   textBtn.addEventListener("click", () => setTool("text"));
+  selectBtn.addEventListener("click", () => setTool("select"));
 
   colorButtons.forEach((button) => {
     button.addEventListener("click", () => setColor(button.dataset.color));
@@ -224,10 +231,20 @@ function bindEventListeners() {
   imageScaleInput.addEventListener("input", (event) => setPendingImageScale(event.target.value));
   rotateImageLeftBtn.addEventListener("click", () => rotatePendingImage(-90));
   rotateImageRightBtn.addEventListener("click", () => rotatePendingImage(90));
+  copySelectionBtn.addEventListener("click", copySelection);
+  cutSelectionBtn.addEventListener("click", cutSelection);
+  pasteSelectionBtn.addEventListener("click", pasteSelection);
+  clearSelectionBtn.addEventListener("click", clearSelection);
   layerOpacityInput.addEventListener("change", updateActiveLayerOpacity);
 
   layerSelect.addEventListener("change", () => {
     activeLayerId = layerSelect.value;
+    if (selection) {
+      selection = null;
+      isSelecting = false;
+      selectionStartPoint = null;
+      renderAllLayers();
+    }
     updateLayerUI();
     refreshHint();
     scheduleAutoSave();

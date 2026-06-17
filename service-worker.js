@@ -1,20 +1,21 @@
-const CACHE_NAME = "tegaki-memo-v16-project-file";
+const CACHE_NAME = "tegaki-memo-v17-selection-tools";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=16",
-  "./js/state.js?v=16",
-  "./js/utils.js?v=16",
-  "./js/history.js?v=16",
-  "./js/layers.js?v=16",
-  "./js/canvas-render.js?v=16",
-  "./js/drawing-tools.js?v=16",
-  "./js/image-placement.js?v=16",
-  "./js/project-storage.js?v=16",
-  "./js/ui.js?v=16",
-  "./js/pwa.js?v=16",
-  "./js/app.js?v=16",
+  "./style.css?v=17",
+  "./js/state.js?v=17",
+  "./js/utils.js?v=17",
+  "./js/history.js?v=17",
+  "./js/layers.js?v=17",
+  "./js/canvas-render.js?v=17",
+  "./js/drawing-tools.js?v=17",
+  "./js/image-placement.js?v=17",
+  "./js/selection-tools.js?v=17",
+  "./js/project-storage.js?v=17",
+  "./js/ui.js?v=17",
+  "./js/pwa.js?v=17",
+  "./js/app.js?v=17",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([
@@ -28,6 +29,7 @@ const NETWORK_FIRST_PATHS = new Set([
   "/canvas-render.js",
   "/drawing-tools.js",
   "/image-placement.js",
+  "/selection-tools.js",
   "/project-storage.js",
   "/ui.js",
   "/pwa.js",

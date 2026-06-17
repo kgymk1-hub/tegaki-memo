@@ -10,6 +10,7 @@ const ellipseBtn = document.getElementById("ellipseBtn");
 const arrowBtn = document.getElementById("arrowBtn");
 const dashedLineBtn = document.getElementById("dashedLineBtn");
 const textBtn = document.getElementById("textBtn");
+const selectBtn = document.getElementById("selectBtn");
 const eraserBtn = document.getElementById("eraserBtn");
 const undoBtn = document.getElementById("undoBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -32,7 +33,8 @@ const toolButtons = [
   ellipseBtn,
   arrowBtn,
   dashedLineBtn,
-  textBtn
+  textBtn,
+  selectBtn
 ];
 
 const backgroundModeSelect = document.getElementById("backgroundModeSelect");
@@ -46,6 +48,10 @@ const imageScaleInput = document.getElementById("imageScaleInput");
 const imageScaleValue = document.getElementById("imageScaleValue");
 const rotateImageLeftBtn = document.getElementById("rotateImageLeftBtn");
 const rotateImageRightBtn = document.getElementById("rotateImageRightBtn");
+const copySelectionBtn = document.getElementById("copySelectionBtn");
+const cutSelectionBtn = document.getElementById("cutSelectionBtn");
+const pasteSelectionBtn = document.getElementById("pasteSelectionBtn");
+const clearSelectionBtn = document.getElementById("clearSelectionBtn");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
@@ -69,6 +75,7 @@ const presetColorNames = {
 const maxHistory = 10;
 const maxLayers = 5;
 const minShapeDistance = 4;
+const minSelectionSize = 4;
 const hiddenLayerDrawingMessage = "非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。";
 const noDrawableLayerMessage = "描画できるレイヤーがありません。";
 const renderScale = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -86,6 +93,10 @@ let canvasWidth = 0;
 let canvasHeight = 0;
 let history = [];
 let pendingImage = null;
+let selection = null;
+let clipboardImageData = null;
+let isSelecting = false;
+let selectionStartPoint = null;
 
 let layers = [];
 let activeLayerId = null;

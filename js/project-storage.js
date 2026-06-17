@@ -61,6 +61,10 @@ async function restoreProjectState(projectState) {
 
   try {
     pendingImage = null;
+    selection = null;
+    clipboardImageData = null;
+    isSelecting = false;
+    selectionStartPoint = null;
     resetDrawingState();
 
     if (projectState.canvas?.width && projectState.canvas?.height) {
@@ -234,6 +238,9 @@ async function loadProjectFile(file) {
 
   await restoreProjectState(projectState);
   pendingImage = null;
+  selection = null;
+  isSelecting = false;
+  selectionStartPoint = null;
   resetDrawingState();
   history = [];
   updateImagePlacementControls();
