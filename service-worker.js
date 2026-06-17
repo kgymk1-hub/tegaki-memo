@@ -1,9 +1,9 @@
-const CACHE_NAME = "tegaki-memo-v10-hidden-layer-hint";
+const CACHE_NAME = "tegaki-memo-v11-image-transform";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=10",
-  "./app.js?v=10",
+  "./style.css?v=11",
+  "./app.js?v=11",
   "./manifest.json",
   "./icons/icon.svg"
 ];
