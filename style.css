@@ -312,3 +312,25 @@ canvas {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
+
+.about-content {
+  max-width: 760px;
+  padding: 0 10px 10px;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.about-content p {
+  margin: 6px 0;
+}
+
+.about-content ul {
+  margin: 6px 0;
+  padding-left: 1.3em;
+}
+
+.app-version {
+  color: #1f2937;
+  font-weight: 700;
+}

@@ -1,21 +1,21 @@
-const CACHE_NAME = "tegaki-memo-v20-pinch-shape-history";
+const CACHE_NAME = "tegaki-memo-v21-release-polish-no-binary";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=20",
-  "./js/state.js?v=20",
-  "./js/utils.js?v=20",
-  "./js/history.js?v=20",
-  "./js/layers.js?v=20",
-  "./js/canvas-render.js?v=20",
-  "./js/drawing-tools.js?v=20",
-  "./js/image-placement.js?v=20",
-  "./js/selection-tools.js?v=20",
-  "./js/project-storage.js?v=20",
-  "./js/ui.js?v=20",
-  "./js/pwa.js?v=20",
-  "./js/app.js?v=20",
+  "./style.css?v=21",
+  "./js/state.js?v=21",
+  "./js/utils.js?v=21",
+  "./js/history.js?v=21",
+  "./js/layers.js?v=21",
+  "./js/canvas-render.js?v=21",
+  "./js/drawing-tools.js?v=21",
+  "./js/image-placement.js?v=21",
+  "./js/selection-tools.js?v=21",
+  "./js/project-storage.js?v=21",
+  "./js/ui.js?v=21",
+  "./js/pwa.js?v=21",
+  "./js/app.js?v=21",
   "./icons/icon.svg"
 ];
 const NETWORK_FIRST_PATHS = new Set([

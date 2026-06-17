@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=20" />
-  <script src="js/state.js?v=20" defer></script>
-  <script src="js/utils.js?v=20" defer></script>
-  <script src="js/history.js?v=20" defer></script>
-  <script src="js/layers.js?v=20" defer></script>
-  <script src="js/canvas-render.js?v=20" defer></script>
-  <script src="js/drawing-tools.js?v=20" defer></script>
-  <script src="js/image-placement.js?v=20" defer></script>
-  <script src="js/selection-tools.js?v=20" defer></script>
-  <script src="js/project-storage.js?v=20" defer></script>
-  <script src="js/ui.js?v=20" defer></script>
-  <script src="js/pwa.js?v=20" defer></script>
-  <script src="js/app.js?v=20" defer></script>
+  <link rel="stylesheet" href="style.css?v=21" />
+  <script src="js/state.js?v=21" defer></script>
+  <script src="js/utils.js?v=21" defer></script>
+  <script src="js/history.js?v=21" defer></script>
+  <script src="js/layers.js?v=21" defer></script>
+  <script src="js/canvas-render.js?v=21" defer></script>
+  <script src="js/drawing-tools.js?v=21" defer></script>
+  <script src="js/image-placement.js?v=21" defer></script>
+  <script src="js/selection-tools.js?v=21" defer></script>
+  <script src="js/project-storage.js?v=21" defer></script>
+  <script src="js/ui.js?v=21" defer></script>
+  <script src="js/pwa.js?v=21" defer></script>
+  <script src="js/app.js?v=21" defer></script>
 </head>
 <body>
   <header>
@@ -147,6 +147,30 @@
           <button id="cutSelectionBtn" type="button" disabled>切取</button>
           <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
           <button id="clearSelectionBtn" type="button" disabled>解除</button>
+        </div>
+      </details>
+
+
+      <details class="control-group" id="aboutPanel">
+        <summary>About</summary>
+        <div class="about-content">
+          <p><strong>Tegaki Memo</strong> - ブラウザで動く手書きメモ・簡易お絵かきPWAです。</p>
+          <p class="app-version">Version 1.0.0</p>
+          <p><strong>主な機能</strong></p>
+          <ul>
+            <li>ペン、マーカー、消しゴム</li>
+            <li>図形、文字入力、レイヤー</li>
+            <li>画像配置、拡大縮小、90度回転</li>
+            <li>選択範囲コピー / 切り取り / 貼り付け</li>
+            <li>自動保存、.tegaki保存 / 読込、PNG保存</li>
+            <li>キャンバスサイズ変更、ピンチズーム</li>
+          </ul>
+          <p><strong>保存について</strong></p>
+          <ul>
+            <li>PNG保存は完成画像として保存します。</li>
+            <li>.tegaki保存は再編集用の作業ファイルです。</li>
+            <li>自動保存はブラウザ内の復元用データです。</li>
+          </ul>
         </div>
       </details>
 

@@ -1,3 +1,5 @@
+const APP_VERSION = "1.0.0";
+
 const canvas = document.getElementById("drawingCanvas");
 const canvasWrap = document.getElementById("canvasWrap");
 const ctx = canvas.getContext("2d");

@@ -1,7 +1,7 @@
 {
-  "name": "手書きメモ",
-  "short_name": "手書きメモ",
-  "description": "ブラウザで動くシンプルな手書きメモ・お絵かきアプリ",
+  "name": "Tegaki Memo",
+  "short_name": "Tegaki Memo",
+  "description": "ブラウザで動く手書きメモ・簡易お絵かきPWA",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
