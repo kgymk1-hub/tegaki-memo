@@ -118,6 +118,7 @@ https://kgymk1-hub.github.io/tegaki-memo/
 - `.tegaki` ファイルはJSON形式で、画像を含むためサイズが大きくなる場合があります。
 - 現在の選択状態や内部クリップボードは `.tegaki` 保存対象外です。
 - ピンチズームは表示倍率のみで、保存画像サイズは変わりません。
+- ピンチズーム時にも描画可能なキャンバス本体とスクロール用余白を見分けやすいよう、キャンバス外の領域を薄いグレーで表示しています。
 - キャンバスサイズを縮小すると、はみ出た部分は切れます。
 - PWA更新が反映されない場合は、キャッシュ削除やPWA再インストールが必要な場合があります。
 - PWA用アイコンとして `icons/icon-192.png` と `icons/icon-512.png` を使用します。既存の `icons/icon.svg` も補助的に残しています。
@@ -152,7 +153,7 @@ tegaki-memo/
    └─ app.js
 ```
 
-`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v25` などの番号は、PWAキャッシュ更新用の内部番号です。
+`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v26` などの番号は、PWAキャッシュ更新用の内部番号です。
 
 ## PWA更新が反映されない場合
 
