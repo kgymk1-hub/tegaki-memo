@@ -298,7 +298,7 @@ function renderQuickPanel(panelName) {
   quickPanelRow.hidden = false;
 }
 
-function clearQuickCategoryActiveState() {
+function updateQuickCategoryActiveState() {
   quickCategoryButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.quickPanel === activeQuickPanel);
     button.setAttribute("aria-expanded", String(button.dataset.quickPanel === activeQuickPanel));
@@ -311,7 +311,7 @@ function closeQuickPanel() {
   quickPanelContents.forEach((panel) => {
     panel.hidden = true;
   });
-  clearQuickCategoryActiveState();
+  updateQuickCategoryActiveState();
 }
 
 function openQuickPanel(panelName) {
@@ -329,7 +329,7 @@ function openQuickPanel(panelName) {
 
   activeQuickPanel = panelName;
   renderQuickPanel(panelName);
-  clearQuickCategoryActiveState();
+  updateQuickCategoryActiveState();
 }
 
 function toggleAdvancedControls() {
