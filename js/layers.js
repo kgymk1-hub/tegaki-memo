@@ -37,14 +37,6 @@ function clearLayerWithoutRender(layer) {
   layer.hasContent = false;
 }
 
-function clearActiveLayer() {
-  const activeLayer = getActiveLayer();
-  if (!activeLayer) return;
-
-  clearLayerWithoutRender(activeLayer);
-  renderAllLayers();
-}
-
 function clearCurrentLayerWithConfirm() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;

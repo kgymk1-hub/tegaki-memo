@@ -6,20 +6,20 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=31" />
-  <script src="js/state.js?v=31" defer></script>
-  <script src="js/utils.js?v=31" defer></script>
-  <script src="js/history.js?v=31" defer></script>
-  <script src="js/layers.js?v=31" defer></script>
-  <script src="js/canvas-render.js?v=31" defer></script>
-  <script src="js/drawing-tools.js?v=31" defer></script>
-  <script src="js/image-placement.js?v=31" defer></script>
-  <script src="js/selection-tools.js?v=31" defer></script>
-  <script src="js/indexeddb-storage.js?v=31" defer></script>
-  <script src="js/project-storage.js?v=31" defer></script>
-  <script src="js/ui.js?v=31" defer></script>
-  <script src="js/pwa.js?v=31" defer></script>
-  <script src="js/app.js?v=31" defer></script>
+  <link rel="stylesheet" href="style.css?v=32" />
+  <script src="js/state.js?v=32" defer></script>
+  <script src="js/utils.js?v=32" defer></script>
+  <script src="js/history.js?v=32" defer></script>
+  <script src="js/layers.js?v=32" defer></script>
+  <script src="js/canvas-render.js?v=32" defer></script>
+  <script src="js/drawing-tools.js?v=32" defer></script>
+  <script src="js/image-placement.js?v=32" defer></script>
+  <script src="js/selection-tools.js?v=32" defer></script>
+  <script src="js/indexeddb-storage.js?v=32" defer></script>
+  <script src="js/project-storage.js?v=32" defer></script>
+  <script src="js/ui.js?v=32" defer></script>
+  <script src="js/pwa.js?v=32" defer></script>
+  <script src="js/app.js?v=32" defer></script>
 </head>
 <body>
   <header>
@@ -37,30 +37,24 @@
         <button id="saveBtn" class="primary" type="button">PNG</button>
         <button id="menuToggleBtn" type="button" aria-controls="advancedControls" aria-expanded="false">メニュー</button>
       </div>
-    </div>
 
-    <div id="advancedControls" class="advanced-controls" aria-label="詳細メニュー">
-      <div class="advanced-controls-header">
-        <strong>詳細メニュー</strong>
-        <button id="menuCloseBtn" type="button">閉じる</button>
+      <div class="quick-category-row" id="quickCategoryRow" aria-label="クイックカテゴリ">
+        <button id="quickExtraToolsBtn" type="button" data-quick-panel="extra">追加ツール</button>
+        <button id="quickStyleBtn" type="button" data-quick-panel="style">色・太さ</button>
+        <button id="quickSelectionBtn" type="button" data-quick-panel="selection">選択操作</button>
+        <button id="quickLayerBtn" type="button" data-quick-panel="layer">レイヤー操作</button>
       </div>
 
-      <details class="control-group">
-        <summary>追加ツール</summary>
-        <div class="tool-row" aria-label="追加ツール">
+      <div class="quick-panel-row" id="quickPanelRow" hidden>
+        <div class="quick-panel-content" id="quickExtraPanel" data-quick-panel-content="extra" aria-label="追加ツール">
           <button id="lineBtn" data-tool="line" type="button">直線</button>
           <button id="rectBtn" data-tool="rect" type="button">四角</button>
           <button id="ellipseBtn" data-tool="ellipse" type="button">円</button>
           <button id="arrowBtn" data-tool="arrow" type="button">矢印</button>
           <button id="dashedLineBtn" data-tool="dashedLine" type="button">点線</button>
           <button id="textBtn" data-tool="text" type="button">文字</button>
-          <button id="selectBtn" data-tool="select" type="button">選択</button>
         </div>
-      </details>
-
-      <details class="control-group" open>
-        <summary>色と太さ</summary>
-        <div class="tool-row" aria-label="色と太さ">
+        <div class="quick-panel-content" id="quickStylePanel" data-quick-panel-content="style" aria-label="色と太さ">
           <button class="colorBtn active" type="button" data-color="#111827">黒</button>
           <button class="colorBtn" type="button" data-color="#dc2626">赤</button>
           <button class="colorBtn" type="button" data-color="#2563eb">青</button>
@@ -75,7 +69,37 @@
             </select>
           </label>
         </div>
-      </details>
+        <div class="quick-panel-content" id="quickSelectionPanel" data-quick-panel-content="selection" aria-label="選択操作">
+          <button id="selectBtn" data-tool="select" type="button">選択</button>
+          <button id="copySelectionBtn" type="button" disabled>コピー</button>
+          <button id="cutSelectionBtn" type="button" disabled>切取</button>
+          <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
+          <button id="clearSelectionBtn" type="button" disabled>解除</button>
+        </div>
+        <div class="quick-panel-content" id="quickLayerPanel" data-quick-panel-content="layer" aria-label="レイヤー操作">
+          <label>レイヤー <select id="layerSelect"></select></label>
+          <button id="addLayerBtn" type="button">追加</button>
+          <button id="duplicateLayerBtn" type="button">複製</button>
+          <button id="deleteLayerBtn" type="button">削除</button>
+          <button id="renameLayerBtn" type="button">名前変更</button>
+          <button id="toggleLayerVisibilityBtn" type="button">表示切替</button>
+          <button id="moveLayerUpBtn" type="button">上へ</button>
+          <button id="moveLayerDownBtn" type="button">下へ</button>
+          <button id="mergeLayerDownBtn" type="button">下へ結合</button>
+          <label class="opacity-control">透明度
+            <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
+            <span id="layerOpacityValue">100%</span>
+          </label>
+          <button id="clearBtn" class="danger" type="button">レイヤー消去</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="advancedControls" class="advanced-controls" aria-label="詳細メニュー">
+      <div class="advanced-controls-header">
+        <strong>詳細メニュー</strong>
+        <button id="menuCloseBtn" type="button">閉じる</button>
+      </div>
 
       <details class="control-group">
         <summary>保存 / 読込</summary>
@@ -98,36 +122,6 @@
           </label>
           <button id="loadImageBtn" type="button">画像読込</button>
           <input id="imageInput" type="file" accept="image/*" hidden />
-        </div>
-      </details>
-
-      <details class="control-group" id="selectionPanel">
-        <summary>選択操作</summary>
-        <div class="tool-row" aria-label="選択操作">
-          <button id="copySelectionBtn" type="button" disabled>コピー</button>
-          <button id="cutSelectionBtn" type="button" disabled>切取</button>
-          <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
-          <button id="clearSelectionBtn" type="button" disabled>解除</button>
-        </div>
-      </details>
-
-      <details class="control-group">
-        <summary>レイヤー操作</summary>
-        <div class="tool-row" aria-label="レイヤー操作">
-          <label>レイヤー <select id="layerSelect"></select></label>
-          <button id="addLayerBtn" type="button">追加</button>
-          <button id="duplicateLayerBtn" type="button">複製</button>
-          <button id="deleteLayerBtn" type="button">削除</button>
-          <button id="renameLayerBtn" type="button">名前変更</button>
-          <button id="toggleLayerVisibilityBtn" type="button">表示切替</button>
-          <button id="moveLayerUpBtn" type="button">上へ</button>
-          <button id="moveLayerDownBtn" type="button">下へ</button>
-          <button id="mergeLayerDownBtn" type="button">下へ結合</button>
-          <label class="opacity-control">透明度
-            <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
-            <span id="layerOpacityValue">100%</span>
-          </label>
-          <button id="clearBtn" class="danger" type="button">レイヤー消去</button>
         </div>
       </details>
 
