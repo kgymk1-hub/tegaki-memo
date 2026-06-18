@@ -294,7 +294,7 @@ async function handleNewProject() {
     return;
   }
 
-  if (!areVisibleLayersEmpty()) {
+  if (hasAnyLayerContent()) {
     const action = await showNewProjectConfirmDialog();
     if (action === "cancel") return;
 

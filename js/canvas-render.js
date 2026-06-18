@@ -165,6 +165,10 @@ function detectLayerHasContent(layer) {
 function areVisibleLayersEmpty() {
   return !layers.some((layer) => layer.visible && layer.hasContent === true);
 }
+
+function hasAnyLayerContent() {
+  return layers.some((layer) => layer.hasContent === true);
+}
 function createExportCanvas() {
   const exportCanvas = document.createElement("canvas");
   exportCanvas.width = canvas.width;
