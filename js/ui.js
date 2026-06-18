@@ -106,6 +106,12 @@ function updateToolButtons() {
     button.disabled = placingImage;
   });
 
+  quickCategoryButtons.forEach((button) => {
+    button.disabled = placingImage;
+  });
+
+  if (placingImage) closeQuickPanel();
+
   updateStatus();
 }
 
@@ -180,6 +186,7 @@ function updateLayerUI() {
   updateUndoButton();
   updateSelectionControls();
   if (imagePanel && placingImage) imagePanel.open = true;
+  if (placingImage) closeQuickPanel();
   refreshHint();
   updateStatus();
 }
@@ -281,11 +288,56 @@ function handlePinchPointerEnd(event) {
   return true;
 }
 
+function renderQuickPanel(panelName) {
+  if (!quickPanelRow) return;
+
+  quickPanelContents.forEach((panel) => {
+    panel.hidden = panel.dataset.quickPanelContent !== panelName;
+  });
+
+  quickPanelRow.hidden = false;
+}
+
+function clearQuickCategoryActiveState() {
+  quickCategoryButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.quickPanel === activeQuickPanel);
+    button.setAttribute("aria-expanded", String(button.dataset.quickPanel === activeQuickPanel));
+  });
+}
+
+function closeQuickPanel() {
+  activeQuickPanel = "";
+  if (quickPanelRow) quickPanelRow.hidden = true;
+  quickPanelContents.forEach((panel) => {
+    panel.hidden = true;
+  });
+  clearQuickCategoryActiveState();
+}
+
+function openQuickPanel(panelName) {
+  if (isPlacingImage()) {
+    closeQuickPanel();
+    return;
+  }
+
+  closeAdvancedControls();
+
+  if (activeQuickPanel === panelName) {
+    closeQuickPanel();
+    return;
+  }
+
+  activeQuickPanel = panelName;
+  renderQuickPanel(panelName);
+  clearQuickCategoryActiveState();
+}
+
 function toggleAdvancedControls() {
   const advancedControls = document.getElementById("advancedControls");
   const menuToggleBtn = document.getElementById("menuToggleBtn");
   if (!advancedControls) return;
   const isOpen = advancedControls.classList.toggle("open");
+  if (isOpen) closeQuickPanel();
   if (menuToggleBtn) menuToggleBtn.setAttribute("aria-expanded", String(isOpen));
 }
 
@@ -302,8 +354,17 @@ function bindEventListeners() {
   const menuCloseButton = document.getElementById("menuCloseBtn");
   if (menuToggleButton) menuToggleButton.addEventListener("click", toggleAdvancedControls);
   if (menuCloseButton) menuCloseButton.addEventListener("click", closeAdvancedControls);
+  quickCategoryButtons.forEach((button) => {
+    button.setAttribute("aria-controls", "quickPanelRow");
+    button.setAttribute("aria-expanded", "false");
+    button.addEventListener("click", () => openQuickPanel(button.dataset.quickPanel));
+  });
+  closeQuickPanel();
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeAdvancedControls();
+    if (event.key === "Escape") {
+      closeAdvancedControls();
+      closeQuickPanel();
+    }
   });
 
   penBtn.addEventListener("click", () => setTool("pen"));

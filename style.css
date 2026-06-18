@@ -119,8 +119,8 @@ h1 {
   position: fixed;
   left: 8px;
   right: 8px;
-  top: 72px;
-  max-height: calc(100dvh - 96px);
+  top: 112px;
+  max-height: calc(100dvh - 128px);
   overflow-y: auto;
   z-index: 50;
   display: none;
@@ -372,8 +372,8 @@ body.image-placing .canvas-bottom-spacer {
   .advanced-controls {
     left: 6px;
     right: 6px;
-    top: 62px;
-    max-height: calc(100dvh - 76px);
+    top: 104px;
+    max-height: calc(100dvh - 118px);
     padding: 8px;
   }
 
@@ -512,4 +512,52 @@ body.image-placing .canvas-bottom-spacer {
 .app-version {
   color: var(--color-text-secondary);
   font-weight: 700;
+}
+
+.quick-category-row,
+.quick-panel-row,
+.quick-panel-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-category-row,
+.quick-panel-row {
+  padding: 4px 2px 0;
+}
+
+.quick-panel-row {
+  border-top: 1px solid var(--color-border);
+  margin-top: 2px;
+}
+
+.quick-panel-row[hidden],
+.quick-panel-content[hidden] {
+  display: none;
+}
+
+.quick-category-row button,
+.quick-panel-row button,
+.quick-panel-row select,
+.quick-panel-row input[type="color"],
+.quick-panel-row label {
+  flex: 0 0 auto;
+}
+
+.quick-panel-row button {
+  min-height: 30px;
+  padding: 4px 8px;
+}
+
+.quick-panel-row label {
+  min-height: 30px;
+}
+
+.quick-panel-row input[type="range"] {
+  width: 96px;
 }
