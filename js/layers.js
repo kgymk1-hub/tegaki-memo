@@ -53,7 +53,10 @@ function clearCurrentLayerWithConfirm() {
   if (!ok) return;
 
   saveHistory();
-  clearActiveLayer();
+  clearLayerWithoutRender(activeLayer);
+  resetSelectionState();
+  updateSelectionControls();
+  renderAllLayers();
   updateHintText();
   setHintVisible(areVisibleLayersEmpty());
   scheduleAutoSave();
