@@ -4,6 +4,7 @@ const canvas = document.getElementById("drawingCanvas");
 const canvasWrap = document.getElementById("canvasWrap");
 const ctx = canvas.getContext("2d");
 
+const newProjectBtn = document.getElementById("newProjectBtn");
 const penBtn = document.getElementById("penBtn");
 const markerBtn = document.getElementById("markerBtn");
 const lineBtn = document.getElementById("lineBtn");
@@ -68,6 +69,10 @@ const quickCategoryRow = document.getElementById("quickCategoryRow");
 const quickPanelRow = document.getElementById("quickPanelRow");
 const quickPanelContents = Array.from(document.querySelectorAll("[data-quick-panel-content]"));
 const quickCategoryButtons = Array.from(document.querySelectorAll("[data-quick-panel]"));
+const newProjectDialog = document.getElementById("newProjectDialog");
+const saveThenNewBtn = document.getElementById("saveThenNewBtn");
+const discardThenNewBtn = document.getElementById("discardThenNewBtn");
+const cancelNewProjectBtn = document.getElementById("cancelNewProjectBtn");
 
 const layerSelect = document.getElementById("layerSelect");
 const addLayerBtn = document.getElementById("addLayerBtn");
