@@ -117,9 +117,11 @@ https://kgymk1-hub.github.io/tegaki-memo/
 
 ## 注意事項
 
-- 自動保存はブラウザ内に保存されます。
-- ブラウザのサイトデータ削除で自動保存は消える場合があります。
-- `.tegaki` ファイルは再編集用の作業ファイルです。
+- 自動保存はブラウザ内のIndexedDBに保存されます。
+- IndexedDBはlocalStorageより容量面で有利なため、大きなキャンバスや複数レイヤーの自動保存が安定しやすくなります。
+- ブラウザのサイトデータ削除で自動保存データは消えます。
+- `.tegaki` ファイルは、手動でファイルとして残す再編集用データです。自動保存とは別の仕組みです。
+- 重要なデータは自動保存だけに頼らず、`.tegaki` 保存も併用してください。
 - PNGは完成画像であり、レイヤー情報は保持しません。
 - `.tegaki` ファイルはJSON形式で、画像を含むためサイズが大きくなる場合があります。
 - 現在の選択状態や内部クリップボードは `.tegaki` 保存対象外です。
@@ -153,13 +155,14 @@ tegaki-memo/
    ├─ drawing-tools.js
    ├─ image-placement.js
    ├─ selection-tools.js
+   ├─ indexeddb-storage.js
    ├─ project-storage.js
    ├─ ui.js
    ├─ pwa.js
    └─ app.js
 ```
 
-`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v29` などの番号は、PWAキャッシュ更新用の内部番号です。
+`index.html` ではES Modulesを使わず、グローバルスコープのJavaScriptを `defer` 付きで読み込みます。アプリ表示上のバージョンは `Version 1.0.0` です。一方、`index.html` や `service-worker.js` で使用している `v30` などの番号は、PWAキャッシュ更新用の内部番号です。
 
 ## PWA更新が反映されない場合
 
@@ -177,7 +180,7 @@ GitHub PagesやPWAでは、Service Workerやブラウザキャッシュにより
 
 ### 技術改善候補
 
-- 自動保存は現在LocalStorageベースのため、将来的にはIndexedDBへ移行し、大きな `.tegaki` 相当データや複数履歴をより安全に扱えるようにすることを検討します。
+- IndexedDBによる大容量自動保存は導入済みです。今後は必要に応じて保存世代管理や使用容量の見える化を検討します。
 - Undo履歴はキャンバス画像を保持するため、履歴数やキャンバスサイズによってメモリ使用量が増えます。将来的には差分保存やImageBitmap活用などで削減する余地があります。
 - 描画更新の一部では `requestAnimationFrame` による `renderAllLayers` 呼び出しの間引きを導入済みです。今後も描画遅延やプレビュー崩れがない範囲を確認しながら、適用範囲を広げる余地があります。
 - CSS変数化は導入済みです。将来的にはこれを土台に、ライト / ダークなどのテーマ切替を検討します。
