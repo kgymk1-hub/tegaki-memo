@@ -354,6 +354,7 @@ function bindEventListeners() {
   const menuCloseButton = document.getElementById("menuCloseBtn");
   if (menuToggleButton) menuToggleButton.addEventListener("click", toggleAdvancedControls);
   if (menuCloseButton) menuCloseButton.addEventListener("click", closeAdvancedControls);
+  newProjectBtn.addEventListener("click", handleNewProject);
   quickCategoryButtons.forEach((button) => {
     button.setAttribute("aria-controls", "quickPanelRow");
     button.setAttribute("aria-expanded", "false");

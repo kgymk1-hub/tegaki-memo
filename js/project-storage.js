@@ -197,6 +197,10 @@ function validateProjectState(projectState) {
 function downloadProjectFile() {
   if (typeof alertIfPlacingImage === "function" && alertIfPlacingImage()) return;
 
+  return saveProjectFile();
+}
+
+function saveProjectFile() {
   try {
     const projectState = serializeProjectState();
     const json = JSON.stringify(projectState, null, 2);
@@ -211,10 +215,96 @@ function downloadProjectFile() {
     link.remove();
     URL.revokeObjectURL(url);
     scheduleAutoSave();
+    return true;
   } catch (error) {
     console.error("プロジェクトファイルの保存に失敗しました。", error);
     alert("プロジェクトファイルを保存できませんでした。");
+    return false;
   }
+}
+
+async function resetToNewProject() {
+  clearTimeout(autoSaveTimer);
+
+  pendingImage = null;
+  selection = null;
+  clipboardImageData = null;
+  isSelecting = false;
+  selectionStartPoint = null;
+  history = [];
+  resetDrawingState();
+  initializeLayers();
+  updateSelectionControls();
+  updateImagePlacementControls();
+  closeQuickPanel();
+  closeAdvancedControls();
+  updateToolButtons();
+  updateUndoButton();
+  refreshHint();
+  await autoSaveNow();
+  showAutoSaveStatus("新規メモを作成しました");
+}
+
+function showNewProjectConfirmDialog() {
+  if (!newProjectDialog?.showModal) {
+    const shouldSave = window.confirm("作成中のメモがあります。保存してから新規作成しますか？\nOK：保存する / キャンセル：保存せずに進むか確認する");
+    if (shouldSave) return Promise.resolve("save");
+
+    const shouldDiscard = window.confirm("保存せずに新規作成しますか？現在のメモは破棄されます。");
+    return Promise.resolve(shouldDiscard ? "discard" : "cancel");
+  }
+
+  return new Promise((resolve) => {
+    const cleanup = () => {
+      saveThenNewBtn.removeEventListener("click", handleSave);
+      discardThenNewBtn.removeEventListener("click", handleDiscard);
+      cancelNewProjectBtn.removeEventListener("click", handleCancel);
+      newProjectDialog.removeEventListener("cancel", handleCancel);
+      newProjectDialog.removeEventListener("close", handleClose);
+    };
+    const closeWith = (result) => {
+      newProjectDialog.dataset.result = result;
+      newProjectDialog.close(result);
+    };
+    const handleSave = () => closeWith("save");
+    const handleDiscard = () => closeWith("discard");
+    const handleCancel = (event) => {
+      if (event?.type === "cancel") event.preventDefault();
+      closeWith("cancel");
+    };
+    const handleClose = () => {
+      const result = newProjectDialog.returnValue || newProjectDialog.dataset.result || "cancel";
+      delete newProjectDialog.dataset.result;
+      cleanup();
+      resolve(result);
+    };
+
+    saveThenNewBtn.addEventListener("click", handleSave);
+    discardThenNewBtn.addEventListener("click", handleDiscard);
+    cancelNewProjectBtn.addEventListener("click", handleCancel);
+    newProjectDialog.addEventListener("cancel", handleCancel);
+    newProjectDialog.addEventListener("close", handleClose);
+    newProjectDialog.showModal();
+  });
+}
+
+async function handleNewProject() {
+  if (isPlacingImage()) {
+    alert(pendingImageActionMessage);
+    return;
+  }
+
+  if (!areVisibleLayersEmpty()) {
+    const action = await showNewProjectConfirmDialog();
+    if (action === "cancel") return;
+
+    if (action === "save") {
+      const saved = saveProjectFile();
+      if (!saved) return;
+    }
+  }
+
+  await resetToNewProject();
 }
 
 function openProjectFilePicker() {
