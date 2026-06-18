@@ -190,7 +190,7 @@ function validateProjectState(projectState) {
     layer
     && typeof layer === "object"
     && typeof layer.imageData === "string"
-    && layer.imageData.startsWith("data:image/png")
+    && layer.imageData.startsWith("data:image/png;base64,")
   ));
 }
 

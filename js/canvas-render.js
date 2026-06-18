@@ -189,10 +189,7 @@ function createExportCanvas() {
 }
 
 function savePng() {
-  if (pendingImage) {
-    alert(pendingImageActionMessage);
-    return;
-  }
+  if (alertIfPlacingImage()) return;
 
   const exportCanvas = createExportCanvas();
 
@@ -223,10 +220,7 @@ function savePng() {
 }
 
 function resizeProjectCanvas(newWidth, newHeight) {
-  if (isPlacingImage()) {
-    alert(pendingImageActionMessage);
-    return;
-  }
+  if (alertIfPlacingImage()) return;
 
   const width = Math.round(Number(newWidth));
   const height = Math.round(Number(newHeight));
