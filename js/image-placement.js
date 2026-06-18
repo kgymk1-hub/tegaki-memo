@@ -14,7 +14,7 @@ function drawImageToLayer(pending, targetLayer, options = {}) {
   if (!targetLayer || !targetLayer.visible) return false;
 
   if (options.clearBeforeDraw) {
-    clearActiveLayerWithoutRender(targetLayer);
+    clearLayerWithoutRender(targetLayer);
   }
 
   const centerX = pending.x + pending.width / 2;
@@ -82,21 +82,7 @@ function rotatePendingImage(deltaDegrees) {
 
 function updateImagePlacementControls() {
   const placingImage = isPlacingImage();
-  confirmImageBtn.disabled = !placingImage;
-  cancelImageBtn.disabled = !placingImage;
-  imageScaleInput.disabled = !placingImage;
-  rotateImageLeftBtn.disabled = !placingImage;
-  rotateImageRightBtn.disabled = !placingImage;
-
-  if (placingImage) {
-    const scalePercent = Math.round(pendingImage.scale * 100);
-    imageScaleInput.value = scalePercent;
-    imageScaleValue.textContent = `${scalePercent}%`;
-  } else {
-    imageScaleInput.value = 100;
-    imageScaleValue.textContent = "100%";
-  }
-  updateImagePlacementBar();
+  syncImagePlacementControls();
   loadImageBtn.disabled = false;
   imageImportMode.disabled = placingImage;
   updateToolButtons();
@@ -247,7 +233,7 @@ function confirmPendingImage() {
   let shouldClearBeforeDraw = false;
 
   if (pending.targetMode === "new") {
-    targetLayer = createLayer(createImageLayerName());
+    targetLayer = createLayer(pending.layerName || createImageLayerName());
     if (!targetLayer) return;
   } else {
     targetLayer = layers.find((layer) => layer.id === pending.targetLayerId) || null;
@@ -291,8 +277,7 @@ function cancelPendingImage() {
 }
 
 function loadImageFile(event) {
-  if (pendingImage) {
-    alert("画像を確定または取消してください。");
+  if (alertIfPlacingImage()) {
     imageInput.value = "";
     return;
   }

@@ -91,6 +91,7 @@ const minShapeDistance = 4;
 const minSelectionSize = 4;
 const hiddenLayerDrawingMessage = "非表示レイヤーには描画できません。表示に切り替えるか、別のレイヤーを選択してください。";
 const noDrawableLayerMessage = "描画できるレイヤーがありません。";
+const pendingImageActionMessage = "画像を確定または取消してください。";
 // renderScale は高DPI端末向けの内部解像度倍率。
 const renderScale = Math.min(window.devicePixelRatio || 1, 1.5);
 

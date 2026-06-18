@@ -6,6 +6,8 @@ function getDisplaySize() {
   };
 }
 
+// 表示上のCSS座標を、描画用の論理座標へ変換する。
+// ペン・図形・文字はこの座標を使い、レイヤー側のtransformで内部解像度へ拡大する。
 function getPointerPoint(event) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvasWidth / Math.max(1, rect.width);
@@ -16,6 +18,7 @@ function getPointerPoint(event) {
   };
 }
 
+// 選択範囲や画像配置は内部ピクセル座標で扱うため、renderScaleを掛けた座標を返す。
 function getPointerCanvasPoint(event) {
   const point = getPointerPoint(event);
   return {

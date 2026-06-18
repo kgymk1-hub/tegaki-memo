@@ -27,7 +27,7 @@ function getActiveLayerIndex() {
   return layers.findIndex((layer) => layer.id === activeLayerId);
 }
 
-function clearActiveLayerWithoutRender(layer) {
+function clearLayerWithoutRender(layer) {
   layer.ctx.save();
   layer.ctx.setTransform(1, 0, 0, 1, 0, 0);
   layer.ctx.globalCompositeOperation = "source-over";
@@ -41,11 +41,11 @@ function clearActiveLayer() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;
 
-  clearActiveLayerWithoutRender(activeLayer);
+  clearLayerWithoutRender(activeLayer);
   renderAllLayers();
 }
 
-function clearCanvas() {
+function clearCurrentLayerWithConfirm() {
   const activeLayer = getActiveLayer();
   if (!activeLayer) return;
 

@@ -190,7 +190,7 @@ function createExportCanvas() {
 
 function savePng() {
   if (pendingImage) {
-    alert("画像を確定または取消してください。");
+    alert(pendingImageActionMessage);
     return;
   }
 
@@ -224,7 +224,7 @@ function savePng() {
 
 function resizeProjectCanvas(newWidth, newHeight) {
   if (isPlacingImage()) {
-    alert("画像を確定または取消してください。");
+    alert(pendingImageActionMessage);
     return;
   }
 
