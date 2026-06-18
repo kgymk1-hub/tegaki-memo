@@ -37,9 +37,10 @@ function getDrawingContext() {
 }
 function applyStrokeStyle(targetCtx, options = {}) {
   const tool = options.tool || currentTool;
+  const isMarker = tool === "marker";
 
   targetCtx.lineWidth = currentSize;
-  targetCtx.lineCap = "round";
+  targetCtx.lineCap = isMarker ? "butt" : "round";
   targetCtx.lineJoin = "round";
   targetCtx.setLineDash([]);
 
@@ -50,7 +51,7 @@ function applyStrokeStyle(targetCtx, options = {}) {
     targetCtx.fillStyle = "rgba(0, 0, 0, 1)";
   } else {
     targetCtx.globalCompositeOperation = "source-over";
-    targetCtx.globalAlpha = tool === "marker" ? 0.35 : 1;
+    targetCtx.globalAlpha = isMarker ? 0.35 : 1;
     targetCtx.strokeStyle = currentColor;
     targetCtx.fillStyle = currentColor;
   }
