@@ -304,7 +304,6 @@ canvas {
 
 .canvas-bottom-spacer {
   height: calc(32px + env(safe-area-inset-bottom));
-  flex: 0 0 auto;
   pointer-events: none;
 }
 
@@ -342,9 +341,6 @@ body.image-placing .canvas-bottom-spacer {
   white-space: nowrap;
 }
 
-.image-placement-bar input[type="range"] {
-  width: min(42vw, 180px);
-}
 
 .canvas-stage .hint {
   position: absolute;

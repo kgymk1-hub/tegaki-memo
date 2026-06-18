@@ -178,21 +178,24 @@ function validateProjectState(projectState) {
   if (!projectState.version) return false;
   if (!projectState.canvas || typeof projectState.canvas !== "object") return false;
   if (!Array.isArray(projectState.layers)) return false;
-  if (projectState.layers.length === 0) return false;
+  if (projectState.layers.length === 0 || projectState.layers.length > maxLayers) return false;
+
+  const width = Number(projectState.canvas.width);
+  const height = Number(projectState.canvas.height);
+
+  if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
+  if (width < 100 || height < 100 || width > 4000 || height > 4000) return false;
 
   return projectState.layers.every((layer) => (
     layer
     && typeof layer === "object"
     && typeof layer.imageData === "string"
-    && layer.imageData.length > 0
+    && layer.imageData.startsWith("data:image/png")
   ));
 }
 
 function downloadProjectFile() {
-  if (isPlacingImage && isPlacingImage()) {
-    alert("画像を確定または取消してください。");
-    return;
-  }
+  if (typeof alertIfPlacingImage === "function" && alertIfPlacingImage()) return;
 
   try {
     const projectState = serializeProjectState();
@@ -215,10 +218,7 @@ function downloadProjectFile() {
 }
 
 function openProjectFilePicker() {
-  if (isPlacingImage && isPlacingImage()) {
-    alert("画像を確定または取消してください。");
-    return;
-  }
+  if (typeof alertIfPlacingImage === "function" && alertIfPlacingImage()) return;
 
   projectFileInput.click();
 }

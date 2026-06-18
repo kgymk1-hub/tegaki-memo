@@ -6,26 +6,26 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
   <title>手書きメモ</title>
-  <link rel="stylesheet" href="style.css?v=30" />
-  <script src="js/state.js?v=30" defer></script>
-  <script src="js/utils.js?v=30" defer></script>
-  <script src="js/history.js?v=30" defer></script>
-  <script src="js/layers.js?v=30" defer></script>
-  <script src="js/canvas-render.js?v=30" defer></script>
-  <script src="js/drawing-tools.js?v=30" defer></script>
-  <script src="js/image-placement.js?v=30" defer></script>
-  <script src="js/selection-tools.js?v=30" defer></script>
-  <script src="js/indexeddb-storage.js?v=30" defer></script>
-  <script src="js/project-storage.js?v=30" defer></script>
-  <script src="js/ui.js?v=30" defer></script>
-  <script src="js/pwa.js?v=30" defer></script>
-  <script src="js/app.js?v=30" defer></script>
+  <link rel="stylesheet" href="style.css?v=31" />
+  <script src="js/state.js?v=31" defer></script>
+  <script src="js/utils.js?v=31" defer></script>
+  <script src="js/history.js?v=31" defer></script>
+  <script src="js/layers.js?v=31" defer></script>
+  <script src="js/canvas-render.js?v=31" defer></script>
+  <script src="js/drawing-tools.js?v=31" defer></script>
+  <script src="js/image-placement.js?v=31" defer></script>
+  <script src="js/selection-tools.js?v=31" defer></script>
+  <script src="js/indexeddb-storage.js?v=31" defer></script>
+  <script src="js/project-storage.js?v=31" defer></script>
+  <script src="js/ui.js?v=31" defer></script>
+  <script src="js/pwa.js?v=31" defer></script>
+  <script src="js/app.js?v=31" defer></script>
 </head>
 <body>
   <header>
     <div class="title-row">
       <h1>手書きメモ</h1>
-      <div class="status" id="status">ペン：黒 / 太さ：普通</div>
+      <div class="status" id="status">ツール：黒 / 太さ：普通</div>
     </div>
 
     <div class="toolbar compact-toolbar" aria-label="よく使う操作">
@@ -54,7 +54,7 @@
           <button id="arrowBtn" data-tool="arrow" type="button">矢印</button>
           <button id="dashedLineBtn" data-tool="dashedLine" type="button">点線</button>
           <button id="textBtn" data-tool="text" type="button">文字</button>
-          <button id="selectBtn" class="tool-btn" data-tool="select" type="button">選択</button>
+          <button id="selectBtn" data-tool="select" type="button">選択</button>
         </div>
       </details>
 
@@ -131,7 +131,7 @@
         </div>
       </details>
 
-      <details class="control-group" id="settingsPanel">
+      <details class="control-group">
         <summary>設定</summary>
         <div class="tool-row" aria-label="背景とキャンバス設定">
           <label>背景
@@ -163,7 +163,7 @@
         </div>
       </details>
 
-      <details class="control-group" id="aboutPanel">
+      <details class="control-group">
         <summary>About</summary>
         <div class="about-content">
           <p><strong>Tegaki Memo</strong> - ブラウザで動く手書きメモ・簡易お絵かきPWAです。</p>
@@ -190,7 +190,7 @@
 
   <main>
     <div class="canvas-wrap" id="canvasWrap">
-      <div class="canvas-stage" id="canvasStage">
+      <div class="canvas-stage">
         <canvas id="drawingCanvas"></canvas>
         <div class="hint" id="hint">指やタッチペンでここに描けます</div>
       </div>

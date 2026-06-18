@@ -95,7 +95,7 @@ function updateStatus() {
     ? activeLayer.visible ? activeLayer.name : `${activeLayer.name}（非表示）`
     : "レイヤーなし";
 
-  status.textContent = `ペン：${getToolLabel()} / 太さ：${sizeLabel} / ${layerLabel}`;
+  status.textContent = `ツール：${getToolLabel()} / 太さ：${sizeLabel} / ${layerLabel}`;
 }
 
 function updateToolButtons() {
@@ -107,6 +107,33 @@ function updateToolButtons() {
   });
 
   updateStatus();
+}
+
+function alertIfPlacingImage() {
+  if (!pendingImage) return false;
+
+  alert(pendingImageActionMessage);
+  return true;
+}
+
+function syncImagePlacementControls() {
+  const placingImage = isPlacingImage();
+  confirmImageBtn.disabled = !placingImage;
+  cancelImageBtn.disabled = !placingImage;
+  imageScaleInput.disabled = !placingImage;
+  rotateImageLeftBtn.disabled = !placingImage;
+  rotateImageRightBtn.disabled = !placingImage;
+
+  if (placingImage) {
+    const scalePercent = Math.round(pendingImage.scale * 100);
+    imageScaleInput.value = scalePercent;
+    imageScaleValue.textContent = `${scalePercent}%`;
+  } else {
+    imageScaleInput.value = 100;
+    imageScaleValue.textContent = "100%";
+  }
+
+  updateImagePlacementBar();
 }
 
 function updateLayerUI() {
@@ -137,21 +164,7 @@ function updateLayerUI() {
   const lowerLayer = activeIndex > 0 ? layers[activeIndex - 1] : null;
   mergeLayerDownBtn.disabled = placingImage || !activeLayer || activeIndex <= 0 || !activeLayer.visible || !lowerLayer?.visible;
   layerSelect.disabled = placingImage;
-  confirmImageBtn.disabled = !placingImage;
-  cancelImageBtn.disabled = !placingImage;
-  imageScaleInput.disabled = !placingImage;
-  rotateImageLeftBtn.disabled = !placingImage;
-  rotateImageRightBtn.disabled = !placingImage;
-
-  if (placingImage) {
-    const scalePercent = Math.round(pendingImage.scale * 100);
-    imageScaleInput.value = scalePercent;
-    imageScaleValue.textContent = `${scalePercent}%`;
-  } else {
-    imageScaleInput.value = 100;
-    imageScaleValue.textContent = "100%";
-  }
-  updateImagePlacementBar();
+  syncImagePlacementControls();
 
   if (activeLayer) {
     toggleLayerVisibilityBtn.textContent = activeLayer.visible ? "非表示" : "表示";
@@ -329,10 +342,7 @@ function bindEventListeners() {
   });
 
   loadImageBtn.addEventListener("click", () => {
-    if (pendingImage) {
-      alert("画像を確定または取消してください。");
-      return;
-    }
+    if (alertIfPlacingImage()) return;
 
     imageInput.click();
   });
@@ -403,7 +413,7 @@ function bindEventListeners() {
   mergeLayerDownBtn.addEventListener("click", mergeActiveLayerDown);
   toggleLayerVisibilityBtn.addEventListener("click", toggleActiveLayerVisibility);
 
-  clearBtn.addEventListener("click", clearCanvas);
+  clearBtn.addEventListener("click", clearCurrentLayerWithConfirm);
   undoBtn.addEventListener("click", () => {
     undo();
     scheduleAutoSave();
@@ -434,8 +444,10 @@ function bindEventListeners() {
     if (!isPinching) stopDrawing(event);
   }, { passive: false });
   canvas.addEventListener("pointerleave", (event) => {
+    if (handlePinchPointerEnd(event)) return;
+
     activePointers.delete(event.pointerId);
-    if (!isPinching) stopDrawing(event);
+    stopDrawing(event);
   }, { passive: false });
 
   window.addEventListener("resize", () => applyViewZoom({ preserveScroll: true }));
