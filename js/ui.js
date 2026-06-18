@@ -408,9 +408,9 @@ function bindEventListeners() {
     undo();
     scheduleAutoSave();
   });
-  clearAutoSaveBtn.addEventListener("click", () => {
+  clearAutoSaveBtn.addEventListener("click", async () => {
     const ok = window.confirm("前回作業データを削除しますか？");
-    if (ok) clearAutoSaveData();
+    if (ok) await clearAutoSaveData();
   });
   saveBtn.addEventListener("click", savePng);
   saveProjectBtn.addEventListener("click", downloadProjectFile);

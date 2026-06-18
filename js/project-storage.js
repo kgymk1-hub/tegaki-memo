@@ -4,6 +4,7 @@ const autoSaveDelay = 1000;
 let autoSaveTimer = null;
 let autoSaveStatusTimer = null;
 let isRestoringProject = false;
+let autoSaveWriteQueue = Promise.resolve();
 
 function serializeProjectState() {
   return {
@@ -282,41 +283,110 @@ function scheduleAutoSave() {
   }, autoSaveDelay);
 }
 
-function autoSaveNow() {
-  if (isRestoringProject) return false;
-
-  try {
-    const projectState = serializeProjectState();
-    localStorage.setItem(autoSaveStorageKey, JSON.stringify(projectState));
-    showAutoSaveStatus("自動保存しました");
-    return true;
-  } catch (error) {
-    console.error("自動保存に失敗しました。localStorage容量を超えた可能性があります。", error);
-    showAutoSaveStatus("自動保存に失敗しました（容量不足の可能性）");
-    return false;
-  }
-}
-
-function loadAutoSaveData() {
+function loadLegacyAutoSaveData() {
   try {
     const rawData = localStorage.getItem(autoSaveStorageKey);
     return rawData ? JSON.parse(rawData) : null;
   } catch (error) {
-    console.error("自動保存データの読み込みに失敗しました。", error);
+    console.warn("旧自動保存データの読み込みに失敗しました。", error);
     return null;
   }
 }
 
-function clearAutoSaveData() {
+function deleteLegacyAutoSaveData() {
   try {
     localStorage.removeItem(autoSaveStorageKey);
-    showAutoSaveStatus("自動保存データを削除しました");
     return true;
   } catch (error) {
-    console.error("自動保存データの削除に失敗しました。", error);
-    showAutoSaveStatus("自動保存データの削除に失敗しました");
+    console.warn("旧自動保存データの削除に失敗しました。", error);
     return false;
   }
+}
+
+function saveLegacyAutoSaveData(projectState) {
+  try {
+    localStorage.setItem(autoSaveStorageKey, JSON.stringify(projectState));
+    return true;
+  } catch (error) {
+    console.warn("localStorageへの自動保存フォールバックに失敗しました。", error);
+    return false;
+  }
+}
+
+async function autoSaveNow() {
+  if (isRestoringProject) return false;
+
+  let projectState;
+  try {
+    projectState = serializeProjectState();
+  } catch (error) {
+    console.error("自動保存データの作成に失敗しました。", error);
+    showAutoSaveStatus("自動保存に失敗しました");
+    return false;
+  }
+
+  autoSaveWriteQueue = autoSaveWriteQueue
+    .catch(() => {})
+    .then(async () => {
+      try {
+        await saveAutoSaveProject(projectState);
+        showAutoSaveStatus("自動保存しました");
+        return true;
+      } catch (error) {
+        console.warn("IndexedDBへの自動保存に失敗しました。localStorageへフォールバックします。", error);
+        if (saveLegacyAutoSaveData(projectState)) {
+          showAutoSaveStatus("自動保存しました（互換保存）");
+          return true;
+        }
+        showAutoSaveStatus("自動保存に失敗しました（容量不足の可能性）");
+        return false;
+      }
+    });
+
+  return autoSaveWriteQueue;
+}
+
+async function loadAutoSaveData() {
+  try {
+    const indexedDbData = await loadAutoSaveProject();
+    if (indexedDbData) return indexedDbData;
+  } catch (error) {
+    console.warn("IndexedDB自動保存データの読み込みに失敗しました。旧保存データを確認します。", error);
+  }
+
+  const legacyData = loadLegacyAutoSaveData();
+  if (!legacyData) return null;
+
+  try {
+    await saveAutoSaveProject(legacyData);
+    deleteLegacyAutoSaveData();
+    console.info("旧localStorage自動保存データをIndexedDBへ移行しました。");
+  } catch (error) {
+    console.warn("旧自動保存データのIndexedDB移行に失敗しました。旧データから復元を続行します。", error);
+  }
+
+  return legacyData;
+}
+
+async function clearAutoSaveData() {
+  let indexedDbDeleted = false;
+  let legacyDeleted = false;
+
+  try {
+    indexedDbDeleted = await deleteAutoSaveProject();
+  } catch (error) {
+    console.warn("IndexedDB自動保存データの削除に失敗しました。", error);
+  }
+
+  legacyDeleted = deleteLegacyAutoSaveData();
+
+  if (indexedDbDeleted || legacyDeleted) {
+    showAutoSaveStatus("自動保存データを削除しました");
+    return true;
+  }
+
+  showAutoSaveStatus("自動保存データの削除に失敗しました");
+  return false;
 }
 
 function showAutoSaveStatus(message) {
@@ -333,7 +403,7 @@ function showAutoSaveStatus(message) {
 }
 
 async function restoreAutoSaveOnStartup() {
-  const autoSaveData = loadAutoSaveData();
+  const autoSaveData = await loadAutoSaveData();
   if (!autoSaveData) return false;
 
   const shouldRestore = window.confirm("前回の作業データがあります。復元しますか？");
