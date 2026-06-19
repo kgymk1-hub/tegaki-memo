@@ -1,7 +1,7 @@
 {
-  "name": "Tegaki Memo",
-  "short_name": "Tegaki Memo",
-  "description": "ブラウザで動く手書きメモ・簡易お絵かきPWA",
+  "name": "Pocket Image Resizer",
+  "short_name": "Image Resizer",
+  "description": "スマホで使いやすい軽量PWA画像リサイズ・トリミングツール",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
