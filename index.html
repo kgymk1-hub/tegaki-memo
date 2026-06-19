@@ -2,63 +2,218 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json" />
-  <title>Pocket Image Resizer</title>
-  <link rel="stylesheet" href="style.css?v=38" />
-  <script src="libs/jszip.min.js?v=38" defer></script>
-  <script src="js/app.js?v=38" defer></script>
+  <title>手書きメモ</title>
+  <link rel="stylesheet" href="style.css?v=37" />
+  <script src="js/state.js?v=37" defer></script>
+  <script src="js/utils.js?v=37" defer></script>
+  <script src="js/history.js?v=37" defer></script>
+  <script src="js/layers.js?v=37" defer></script>
+  <script src="js/canvas-render.js?v=37" defer></script>
+  <script src="js/drawing-tools.js?v=37" defer></script>
+  <script src="js/image-placement.js?v=37" defer></script>
+  <script src="js/selection-tools.js?v=37" defer></script>
+  <script src="js/indexeddb-storage.js?v=37" defer></script>
+  <script src="js/project-storage.js?v=37" defer></script>
+  <script src="js/ui.js?v=37" defer></script>
+  <script src="js/pwa.js?v=37" defer></script>
+  <script src="js/app.js?v=37" defer></script>
 </head>
 <body>
-  <header class="app-header">
-    <div><h1>Pocket Image Resizer</h1><p>Android Chromeで使いやすい軽量PWA画像変換ツール</p></div>
-    <div id="message" class="message" role="status" aria-live="polite"></div>
+  <header>
+    <div class="title-row">
+      <h1>手書きメモ</h1>
+      <div class="status" id="status">ツール：黒 / 太さ：普通</div>
+    </div>
+
+    <div class="toolbar compact-toolbar" aria-label="よく使う操作">
+      <div class="tool-row primary-actions">
+        <button id="newProjectBtn" type="button">新規</button>
+        <button id="penBtn" data-tool="pen" class="active" type="button">ペン</button>
+        <button id="markerBtn" data-tool="marker" type="button">マーカー</button>
+        <button id="eraserBtn" data-tool="eraser" type="button">消しゴム</button>
+        <button id="undoBtn" type="button" disabled>戻す</button>
+        <button id="saveBtn" class="primary" type="button">PNG</button>
+        <button id="menuToggleBtn" type="button" aria-controls="advancedControls" aria-expanded="false">メニュー</button>
+      </div>
+
+      <div class="quick-category-row" id="quickCategoryRow" aria-label="クイックカテゴリ">
+        <button id="quickExtraToolsBtn" type="button" data-quick-panel="extra">追加ツール</button>
+        <button id="quickStyleBtn" type="button" data-quick-panel="style">色・太さ</button>
+        <button id="quickSelectionBtn" type="button" data-quick-panel="selection">選択操作</button>
+        <button id="quickLayerBtn" type="button" data-quick-panel="layer">レイヤー操作</button>
+      </div>
+
+      <div class="quick-panel-row" id="quickPanelRow" hidden>
+        <div class="quick-panel-content" id="quickExtraPanel" data-quick-panel-content="extra" aria-label="追加ツール">
+          <button id="lineBtn" data-tool="line" type="button">直線</button>
+          <button id="rectBtn" data-tool="rect" type="button">四角</button>
+          <button id="ellipseBtn" data-tool="ellipse" type="button">円</button>
+          <button id="arrowBtn" data-tool="arrow" type="button">矢印</button>
+          <button id="dashedLineBtn" data-tool="dashedLine" type="button">点線</button>
+          <button id="textBtn" data-tool="text" type="button">文字</button>
+        </div>
+        <div class="quick-panel-content" id="quickStylePanel" data-quick-panel-content="style" aria-label="色と太さ">
+          <button class="colorBtn active" type="button" data-color="#111827">黒</button>
+          <button class="colorBtn" type="button" data-color="#dc2626">赤</button>
+          <button class="colorBtn" type="button" data-color="#2563eb">青</button>
+          <button class="colorBtn" type="button" data-color="#16a34a">緑</button>
+          <label>色 <input id="customColor" type="color" value="#111827" /></label>
+          <label>太さ
+            <select id="sizeSelect">
+              <option value="3">細い</option>
+              <option value="7" selected>普通</option>
+              <option value="14">太い</option>
+              <option value="24">極太</option>
+            </select>
+          </label>
+        </div>
+        <div class="quick-panel-content" id="quickSelectionPanel" data-quick-panel-content="selection" aria-label="選択操作">
+          <button id="selectBtn" data-tool="select" type="button">選択</button>
+          <button id="copySelectionBtn" type="button" disabled>コピー</button>
+          <button id="cutSelectionBtn" type="button" disabled>切取</button>
+          <button id="pasteSelectionBtn" type="button" disabled>貼付</button>
+          <button id="clearSelectionBtn" type="button" disabled>解除</button>
+        </div>
+        <div class="quick-panel-content" id="quickLayerPanel" data-quick-panel-content="layer" aria-label="レイヤー操作">
+          <label>レイヤー <select id="layerSelect"></select></label>
+          <button id="addLayerBtn" type="button">追加</button>
+          <button id="duplicateLayerBtn" type="button">複製</button>
+          <button id="deleteLayerBtn" type="button">削除</button>
+          <button id="renameLayerBtn" type="button">名前変更</button>
+          <button id="toggleLayerVisibilityBtn" type="button">表示切替</button>
+          <button id="moveLayerUpBtn" type="button">上へ</button>
+          <button id="moveLayerDownBtn" type="button">下へ</button>
+          <button id="mergeLayerDownBtn" type="button">下へ結合</button>
+          <label class="opacity-control">透明度
+            <input id="layerOpacityInput" type="range" min="10" max="100" step="10" value="100" />
+            <span id="layerOpacityValue">100%</span>
+          </label>
+          <button id="clearBtn" class="danger" type="button">レイヤー消去</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="advancedControls" class="advanced-controls" aria-label="詳細メニュー">
+      <div class="advanced-controls-header">
+        <strong>詳細メニュー</strong>
+        <button id="menuCloseBtn" type="button">閉じる</button>
+      </div>
+
+      <details class="control-group">
+        <summary>保存 / 読込</summary>
+        <div class="tool-row" aria-label="保存と読込">
+          <button id="saveProjectBtn" class="primary" type="button">作業保存</button>
+          <button id="loadProjectBtn" type="button">作業読込</button>
+          <input id="projectFileInput" type="file" accept=".tegaki,application/json" hidden />
+          <button id="clearAutoSaveBtn" type="button">自動保存削除</button>
+        </div>
+      </details>
+
+      <details class="control-group" id="imagePanel">
+        <summary>画像操作</summary>
+        <div class="tool-row" aria-label="画像操作">
+          <label>読込先
+            <select id="imageImportMode">
+              <option value="new-layer" selected>新規レイヤー</option>
+              <option value="current-layer">現在レイヤーを置換</option>
+            </select>
+          </label>
+          <button id="loadImageBtn" type="button">画像読込</button>
+          <input id="imageInput" type="file" accept="image/*" hidden />
+        </div>
+      </details>
+
+      <details class="control-group">
+        <summary>設定</summary>
+        <div class="tool-row" aria-label="背景とキャンバス設定">
+          <label>背景
+            <select id="backgroundModeSelect">
+              <option value="white" selected>白</option>
+              <option value="color">色</option>
+              <option value="transparent">透明</option>
+            </select>
+          </label>
+          <label>背景色 <input id="backgroundColorInput" type="color" value="#ffffff" /></label>
+          <label for="canvasWidthInput">幅 <input id="canvasWidthInput" class="number-input" type="number" min="100" max="4000" step="10" /></label>
+          <label for="canvasHeightInput">高さ <input id="canvasHeightInput" class="number-input" type="number" min="100" max="4000" step="10" /></label>
+          <select id="canvasSizePreset" aria-label="キャンバスサイズプリセット">
+            <option value="">サイズ選択</option>
+            <option value="square">正方形</option>
+            <option value="phonePortrait">スマホ縦</option>
+            <option value="phoneLandscape">スマホ横</option>
+            <option value="a4Portrait">A4縦比率</option>
+            <option value="a4Landscape">A4横比率</option>
+          </select>
+          <button id="applyCanvasSizeBtn" type="button">サイズ変更</button>
+          <label class="zoom-input-label" for="viewZoomInput">表示倍率
+            <input id="viewZoomInput" class="number-input zoom-number-input" type="number" min="5" max="400" step="1" value="100" inputmode="numeric" />
+          </label>
+          <span class="zoom-unit">%</span>
+          <span class="zoom-display">現在 <span id="zoomValue">100%</span></span>
+          <button id="fitViewBtn" type="button">全体表示</button>
+          <button id="resetZoomBtn" type="button">等倍</button>
+        </div>
+      </details>
+
+      <details class="control-group">
+        <summary>About</summary>
+        <div class="about-content">
+          <p><strong>Tegaki Memo</strong> - ブラウザで動く手書きメモ・簡易お絵かきPWAです。</p>
+          <p class="app-version">Version 1.0.0</p>
+          <p><strong>主な機能</strong></p>
+          <ul>
+            <li>ペン、マーカー、消しゴム</li>
+            <li>図形、文字入力、レイヤー</li>
+            <li>画像配置、拡大縮小、90度回転</li>
+            <li>選択範囲コピー / 切り取り / 貼り付け</li>
+            <li>自動保存、.tegaki保存 / 読込、PNG保存</li>
+            <li>キャンバスサイズ変更、ピンチズーム</li>
+          </ul>
+          <p><strong>保存について</strong></p>
+          <ul>
+            <li>PNG保存は完成画像として保存します。</li>
+            <li>.tegaki保存は再編集用の作業ファイルです。</li>
+            <li>自動保存はブラウザ内の復元用データです。</li>
+          </ul>
+        </div>
+      </details>
+    </div>
   </header>
-  <main class="app-shell">
-    <nav class="segmented top-tabs" aria-label="変換モード">
-      <button id="singleTopBtn" class="active" type="button">1枚変換</button>
-      <button id="batchTopBtn" type="button">一括変換</button>
-    </nav>
 
-    <section id="singleSection" class="mode-section">
-      <section class="card file-card">
-        <h2>画像選択</h2>
-        <input id="singleFile" type="file" accept="image/png,image/jpeg,image/webp" />
-        <div id="singleInfo" class="info-grid"></div>
-      </section>
-      <section class="preview-card card">
-        <h2>プレビュー</h2>
-        <canvas id="singlePreview" class="preview-canvas"></canvas>
-        <p id="singlePreviewText" class="muted">画像を選択してください。</p>
-        <div id="singleNudge" class="nudge-panel"></div>
-      </section>
-      <nav class="segmented" aria-label="1枚変換の処理">
-        <button id="singleResizeBtn" class="active" type="button">リサイズ</button>
-        <button id="singleCropBtn" type="button">トリミング</button>
-      </nav>
-      <section id="singleResizePanel" class="card settings-panel">
-        <h2>リサイズ</h2><p class="mode-desc">指定した幅・高さに変換します。</p>
-        <div class="choice-grid" id="singleResizeMethod"></div>
-        <div class="form-grid"><label>幅<input id="singleResizeWidth" type="number" min="1" max="4096" inputmode="numeric"></label><label>高さ<input id="singleResizeHeight" type="number" min="1" max="4096" inputmode="numeric"></label></div>
-        <p id="singleResizeNote" class="notice"></p><div id="singleResizePresets"></div><div id="singleResizePosition"></div><div id="singleResizeMatte"></div>
-      </section>
-      <section id="singleCropPanel" class="card settings-panel hidden">
-        <h2>トリミング</h2><p class="mode-desc">画像を拡大縮小せず、切り抜きまたは余白付与で出力範囲を作ります。</p>
-        <div class="form-grid"><label>方向<select id="cropDirection"><option value="both">上下左右トリミング</option><option value="vertical">上下のみトリミング</option><option value="horizontal">左右のみトリミング</option></select></label><label>縦横比<select id="cropRatio"></select></label></div>
-        <div class="form-grid"><label>幅<input id="singleCropWidth" type="number" min="1" max="4096" inputmode="numeric"></label><label>高さ<input id="singleCropHeight" type="number" min="1" max="4096" inputmode="numeric"></label></div>
-        <div id="singleCropPresets"></div><div id="singleCropPosition"></div><div id="singleCropMatte"></div>
-      </section>
-      <section class="card save-card"><h2>保存設定</h2><div class="form-grid"><label>形式<select id="singleFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select></label><label id="singleQualityLabel">品質<select id="singleQuality"><option value="0.6">低</option><option value="0.85" selected>標準</option><option value="0.95">高</option></select></label></div><p id="singleJpegNote" class="notice">JPEGでは透明部分は白背景として保存されます。</p><div class="action-row"><button id="singleSaveBtn" class="primary" type="button">保存</button><button id="continueBtn" type="button">この結果を使って続ける</button><button id="resetOriginalBtn" type="button">元画像に戻す</button></div></section>
-    </section>
-
-    <section id="batchSection" class="mode-section hidden">
-      <section class="card"><h2>複数画像選択</h2><input id="batchFiles" type="file" multiple accept="image/png,image/jpeg,image/webp"><div id="batchInfo" class="info-grid"></div></section>
-      <section class="preview-card card"><h2>一括プレビュー</h2><canvas id="batchPreview" class="preview-canvas"></canvas><p id="batchPreviewText" class="muted">複数画像を選択してください。</p><div class="pager"><button id="batchPrev" type="button">前へ</button><span id="batchPager">0 / 0</span><button id="batchNext" type="button">次へ</button></div></section>
-      <nav class="segmented"><button id="batchResizeBtn" class="active" type="button">リサイズ</button><button id="batchCropBtn" type="button">トリミング</button></nav>
-      <section class="card settings-panel"><h2>共通設定</h2><p id="batchDesc" class="mode-desc"></p><div id="batchResizeMethod" class="choice-grid"></div><div class="form-grid"><label>幅<input id="batchWidth" type="number" min="1" max="4096" inputmode="numeric"></label><label>高さ<input id="batchHeight" type="number" min="1" max="4096" inputmode="numeric"></label></div><div id="batchPresets"></div><div id="batchPosition"></div><div id="batchMatte"></div></section>
-      <section class="card save-card"><h2>保存設定</h2><div class="form-grid"><label>形式<select id="batchFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select></label><label id="batchQualityLabel">品質<select id="batchQuality"><option value="0.6">低</option><option value="0.85" selected>標準</option><option value="0.95">高</option></select></label></div><p class="notice">連続ダウンロードは最大10枚までです。枚数が多い場合はZIP保存を使ってください。ブラウザによっては複数ダウンロードがブロックされる場合があります。</p><p class="notice">JPEGでは透明部分は白背景として保存されます。</p><div class="action-row"><button id="zipSaveBtn" class="primary" type="button">ZIPで保存</button><button id="multiDownloadBtn" type="button">連続ダウンロード</button></div></section>
-    </section>
+  <main>
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas-stage">
+        <canvas id="drawingCanvas"></canvas>
+        <div class="hint" id="hint">指やタッチペンでここに描けます</div>
+      </div>
+      <div class="canvas-bottom-spacer" aria-hidden="true"></div>
+    </div>
   </main>
+
+  <dialog id="newProjectDialog" class="new-project-dialog" aria-labelledby="newProjectDialogTitle">
+    <form method="dialog" class="new-project-dialog-content">
+      <h2 id="newProjectDialogTitle">作成中のメモがあります。</h2>
+      <p>保存してから新規作成しますか？</p>
+      <div class="new-project-dialog-actions">
+        <button id="saveThenNewBtn" class="primary" type="button" value="save">保存して新規作成</button>
+        <button id="discardThenNewBtn" class="danger" type="button" value="discard">保存せず新規作成</button>
+        <button id="cancelNewProjectBtn" type="button" value="cancel">キャンセル</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="imagePlacementBar" class="image-placement-bar" hidden>
+    <button id="confirmImageBtn" class="primary" type="button" disabled>確定</button>
+    <button id="cancelImageBtn" type="button" disabled>取消</button>
+    <label class="image-scale-control" for="imageScaleInput">倍率
+      <input id="imageScaleInput" type="range" min="10" max="300" value="100" step="5" disabled />
+      <span id="imageScaleValue">100%</span>
+    </label>
+    <button id="rotateImageLeftBtn" type="button" disabled>左90°</button>
+    <button id="rotateImageRightBtn" type="button" disabled>右90°</button>
+  </div>
 </body>
 </html>
