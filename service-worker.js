@@ -1,19 +1,115 @@
-const CACHE_NAME = "pocket-image-resizer-v38-redesign";
+const CACHE_NAME = "tegaki-memo-v37-new-project";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./style.css?v=38",
-  "./libs/jszip.min.js?v=38",
-  "./js/app.js?v=38",
+  "./style.css?v=37",
+  "./js/state.js?v=37",
+  "./js/utils.js?v=37",
+  "./js/history.js?v=37",
+  "./js/layers.js?v=37",
+  "./js/canvas-render.js?v=37",
+  "./js/drawing-tools.js?v=37",
+  "./js/image-placement.js?v=37",
+  "./js/selection-tools.js?v=37",
+  "./js/indexeddb-storage.js?v=37",
+  "./js/project-storage.js?v=37",
+  "./js/ui.js?v=37",
+  "./js/pwa.js?v=37",
+  "./js/app.js?v=37",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon.svg"
 ];
-function isSameOrigin(request){return new URL(request.url).origin===self.location.origin;}
-function shouldCacheResponse(response){return response&&response.ok&&response.type==="basic";}
-async function cacheFirst(request){const cached=await caches.match(request);if(cached)return cached;const response=await fetch(request);if(isSameOrigin(request)&&shouldCacheResponse(response)){const cache=await caches.open(CACHE_NAME);cache.put(request,response.clone());}return response;}
-async function networkFirst(request){try{const response=await fetch(request);if(isSameOrigin(request)&&shouldCacheResponse(response)){const cache=await caches.open(CACHE_NAME);cache.put(request,response.clone());}return response;}catch(error){const cached=await caches.match(request);if(cached)return cached;throw error;}}
-self.addEventListener("install",(event)=>{event.waitUntil(caches.open(CACHE_NAME).then((cache)=>cache.addAll(APP_SHELL)));self.skipWaiting();});
-self.addEventListener("activate",(event)=>{event.waitUntil(caches.keys().then((names)=>Promise.all(names.filter((name)=>name!==CACHE_NAME).map((name)=>caches.delete(name)))).then(()=>self.clients.claim()));});
-self.addEventListener("fetch",(event)=>{if(event.request.method!=="GET")return;event.respondWith(event.request.mode==="navigate"?networkFirst(event.request):cacheFirst(event.request));});
+const NETWORK_FIRST_PATHS = new Set([
+  "/",
+  "/index.html",
+  "/style.css",
+  "/state.js",
+  "/utils.js",
+  "/history.js",
+  "/layers.js",
+  "/canvas-render.js",
+  "/drawing-tools.js",
+  "/image-placement.js",
+  "/selection-tools.js",
+  "/indexeddb-storage.js",
+  "/project-storage.js",
+  "/ui.js",
+  "/pwa.js",
+  "/app.js"
+]);
+
+function isSameOrigin(request) {
+  return new URL(request.url).origin === self.location.origin;
+}
+
+function shouldCacheResponse(response) {
+  return response && response.ok && response.type === "basic";
+}
+
+function isNetworkFirstRequest(request) {
+  if (request.mode === "navigate") return true;
+
+  const url = new URL(request.url);
+  const fileName = url.pathname.split("/").pop();
+  const path = fileName ? `/${fileName}` : "/";
+  return NETWORK_FIRST_PATHS.has(path);
+}
+
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) return cachedResponse;
+
+  const networkResponse = await fetch(request);
+  if (isSameOrigin(request) && shouldCacheResponse(networkResponse)) {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, networkResponse.clone());
+  }
+  return networkResponse;
+}
+
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (isSameOrigin(request) && shouldCacheResponse(networkResponse)) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) return cachedResponse;
+    throw error;
+  }
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((cacheNames) => Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    isNetworkFirstRequest(event.request)
+      ? networkFirst(event.request)
+      : cacheFirst(event.request)
+  );
+});
